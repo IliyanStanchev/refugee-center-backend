@@ -1,31 +1,28 @@
 package bg.tuvarna.diploma_work.helpers;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class EmailTemplates {
 
-    public static final String companyAddress   = "Varna 9000, Gotse Delchev 9";
-    public static final String companyPhone     = "+359 08982231";
-    public static final String companyEmail     = "safe_shelter@sshelter.com";
+    public static final String COMPANY_ADDRESS = "Varna 9000, Gotse Delchev 9";
+    public static final String COMPANY_PHONE = "+359 08982231";
+    public static final String COMPANY_EMAIL = "safe_shelter@sshelter.com";
 
-    public static final String resetPasswordTemplatePath = "src/main/resources/templates/resetEmailTemplate.html";
+    public static final String RESET_PASSWORD_TEMPLATE_PATH = "src/main/resources/templates/resetEmailTemplate.html";
 
-    public static final String getResetPasswordTemplate() {
+    public static String getResetPasswordTemplate() {
 
-        return getTemplate(resetPasswordTemplatePath);
+        return getTemplate(RESET_PASSWORD_TEMPLATE_PATH);
     }
 
     private static String getTemplate(String htmlPath) {
 
         return convertHtmlToString(htmlPath)
-                .replace("{ADDRESS}", companyAddress)
-                .replace("{PHONE}"  , companyPhone)
-                .replace("{EMAIL}"  , companyEmail);
+                .replace("{ADDRESS}", COMPANY_ADDRESS)
+                .replace("{PHONE}", COMPANY_PHONE)
+                .replace("{EMAIL}", COMPANY_EMAIL);
     }
 
     private static String convertHtmlToString(String htmlPath){

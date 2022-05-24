@@ -1,7 +1,6 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.helpers.EmailTemplates;
-import bg.tuvarna.diploma_work.models.Customer;
 import bg.tuvarna.diploma_work.models.Message;
 import bg.tuvarna.diploma_work.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,17 +47,17 @@ public class MailService {
         return true;
     }
 
-    public boolean sendResetPasswordEmail(Customer customer, String newPassword) {
+    public boolean sendResetPasswordEmail(User user, String newPassword) {
 
         Message message = new Message();
 
         message.setSender(environment.getProperty("spring.mail.username"));
-        message.setReceiver(customer.getUser().getEmail());
+        message.setReceiver(user.getEmail());
 
         message.setSubject("Password reset");
 
         final String messageContent = EmailTemplates.getResetPasswordTemplate()
-                .replace("{NAME}", customer.getName())
+                .replace("{NAME}", user.getName())
                 .replace("{PASSWORD}", newPassword );
 
         message.setContent(messageContent);
@@ -68,4 +67,26 @@ public class MailService {
 
         return true;
     }
+
+    public boolean sendNewUserEmail(User user, String newPassword) {
+
+        Message message = new Message();
+
+        message.setSender(environment.getProperty("spring.mail.username"));
+        message.setReceiver(user.getEmail());
+
+        message.setSubject("Welcome");
+
+        final String messageContent = EmailTemplates.getNewUserTemplate()
+                .replace("{NAME}", user.getName())
+                .replace("{PASSWORD}", newPassword );
+
+        message.setContent(messageContent);
+
+        if(!sendEmail(message))
+            return false;
+
+        return true;
+    }
+
 }

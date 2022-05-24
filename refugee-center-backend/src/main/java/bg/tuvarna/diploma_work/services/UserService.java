@@ -40,8 +40,10 @@ public class UserService {
         BCryptPasswordEncoderExtender bCryptPasswordEncoder = new BCryptPasswordEncoderExtender();
         modifiedUser.setPassword( bCryptPasswordEncoder.encode( modifiedUser.getPassword() ));
 
-        Optional<User> user = userRepository.findById( modifiedUser.getId() );
+        if( modifiedUser.getId() == null )
+            modifiedUser.setId(0L);
 
+        Optional<User> user = userRepository.findById( modifiedUser.getId() );
         return user.isPresent() ? updateUser( modifiedUser, user.get() ) : saveUser( modifiedUser, roleType );
 
     }
@@ -64,6 +66,7 @@ public class UserService {
     }
 
     private User saveUser( User user, RoleType roleType ){
+
         Role role = roleRepository.getRole( roleType );
 
         if( role == null )
@@ -93,5 +96,9 @@ public class UserService {
         currentUser.setPassword(bCryptPasswordEncoderExtender.encode(newPassword));
 
         return userRepository.save(currentUser);
+    }
+
+    public User getUserByIdentifier(String identifier) {
+        return userRepository.getUserByIdentifier(identifier);
     }
 }

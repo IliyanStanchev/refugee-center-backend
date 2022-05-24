@@ -13,9 +13,11 @@ public class Address implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
-    private String country;
+    private String countryIsoCode;
 
-    private String city;
+    private String stateIsoCode;
+
+    private String cityName;
 
     private String address;
 
@@ -23,10 +25,12 @@ public class Address implements Serializable {
 
     }
 
-    public Address(String country, String city, String address) {
-        this.country = country;
-        this.city = city;
-        this.address = address;
+    public String getStateIsoCode() {
+        return stateIsoCode;
+    }
+
+    public void setStateIsoCode(String stateIsoCode) {
+        this.stateIsoCode = stateIsoCode;
     }
 
     public Long getId() {
@@ -37,20 +41,20 @@ public class Address implements Serializable {
         this.id = id;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountryIsoCode() {
+        return countryIsoCode;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountryIsoCode(String countryIsoCode) {
+        this.countryIsoCode = countryIsoCode;
     }
 
-    public String getCity() {
-        return city;
+    public String getCityName() {
+        return cityName;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public String getAddress() {
@@ -66,11 +70,21 @@ public class Address implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Address address1 = (Address) o;
-        return Objects.equals(id, address1.id) && Objects.equals(country, address1.country) && Objects.equals(city, address1.city) && Objects.equals(address, address1.address);
+        return Objects.equals(id, address1.id) && Objects.equals(countryIsoCode, address1.countryIsoCode) && Objects.equals(cityName, address1.cityName) && Objects.equals(address, address1.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, country, city, address);
+        return Objects.hash(id, countryIsoCode, cityName, address);
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "countryIsoCode='" + countryIsoCode + '\'' +
+                ", stateIsoCode='" + stateIsoCode + '\'' +
+                ", cityName='" + cityName + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 }

@@ -1,7 +1,10 @@
 package bg.tuvarna.diploma_work.models;
 
+import org.apache.tomcat.jni.Local;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 
@@ -17,14 +20,56 @@ public class User implements Serializable {
     private String email;
     private String password;
 
-    private Date createdOn;
-    private Date lastLogin;
+    private String firstName;
+    private String lastName;
+    private String identifier;
+
+    private LocalDate createdOn;
+    private LocalDate lastLogin;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
 
     public User() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(identifier, user.identifier) && Objects.equals(createdOn, user.createdOn) && Objects.equals(lastLogin, user.lastLogin) && Objects.equals(role, user.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, password, firstName, lastName, identifier, createdOn, lastLogin, role);
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Long getId() {
@@ -51,19 +96,19 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public Date getCreatedOn() {
+    public LocalDate getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Date createdOn) {
+    public void setCreatedOn(LocalDate createdOn) {
         this.createdOn = createdOn;
     }
 
-    public Date getLastLogin() {
+    public LocalDate getLastLogin() {
         return lastLogin;
     }
 
-    public void setLastLogin(Date lastLogin) {
+    public void setLastLogin(LocalDate lastLogin) {
         this.lastLogin = lastLogin;
     }
 
@@ -75,27 +120,12 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id)
-                && Objects.equals(password, user.password)
-                && Objects.equals(email, user.email)
-                && Objects.equals(createdOn, user.createdOn)
-                && Objects.equals(lastLogin, user.lastLogin)
-                && Objects.equals(role, user.role);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, password, email, createdOn, lastLogin, role);
-    }
-
     public void setNewValues( User newBuffer ) {
         setPassword(newBuffer.getPassword());
         setEmail(newBuffer.getEmail());
+    }
+
+    public String getName() {
+        return firstName + " " + lastName;
     }
 }

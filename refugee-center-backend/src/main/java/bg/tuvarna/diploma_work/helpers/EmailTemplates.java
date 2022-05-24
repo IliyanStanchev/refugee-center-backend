@@ -11,6 +11,7 @@ public class EmailTemplates {
     public static final String COMPANY_EMAIL = "safe_shelter@sshelter.com";
 
     public static final String RESET_PASSWORD_TEMPLATE_PATH = "src/main/resources/templates/resetEmailTemplate.html";
+    public static final String NEW_USER_TEMPLATE_PATH = "src/main/resources/templates/newUserEmailTemplate.html";
 
     public static String getResetPasswordTemplate() {
 
@@ -39,5 +40,9 @@ public class EmailTemplates {
         }
 
         return contentBuilder.toString();
+    }
+
+    public static String getNewUserTemplate() {
+        return getTemplate(NEW_USER_TEMPLATE_PATH);
     }
 }

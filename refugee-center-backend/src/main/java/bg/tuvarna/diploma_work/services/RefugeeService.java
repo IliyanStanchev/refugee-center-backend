@@ -5,12 +5,24 @@ import bg.tuvarna.diploma_work.repositories.RefugeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class RefugeeService {
 
     @Autowired
     private RefugeeRepository refugeeRepository;
 
+    public Refugee getRefugeeByID(Long id) {
+
+        Optional< Refugee > optionalRefugee = refugeeRepository.findById(id);
+
+        if( optionalRefugee.isPresent() )
+            return optionalRefugee.get();
+
+        return null;
+    }
     public Refugee getRefugeeByUserID(Long id) {
         return refugeeRepository.getRefugeeByUserID(id);
     }
@@ -20,5 +32,9 @@ public class RefugeeService {
         refugee.setId(0L);
 
         return refugeeRepository.save(refugee);
+    }
+
+    public List<Refugee> getPendingRegistrations() {
+        return refugeeRepository.getPendingRegistrations();
     }
 }

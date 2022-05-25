@@ -12,11 +12,7 @@ public class EmailTemplates {
 
     public static final String RESET_PASSWORD_TEMPLATE_PATH = "src/main/resources/templates/resetEmailTemplate.html";
     public static final String NEW_USER_TEMPLATE_PATH = "src/main/resources/templates/newUserEmailTemplate.html";
-
-    public static String getResetPasswordTemplate() {
-
-        return getTemplate(RESET_PASSWORD_TEMPLATE_PATH);
-    }
+    public static final String DECLINED_REGISTRATION_TEMPLATE_PATH = "src/main/resources/templates/declinedRegistrationTemplate.html";
 
     private static String getTemplate(String htmlPath) {
 
@@ -42,7 +38,15 @@ public class EmailTemplates {
         return contentBuilder.toString();
     }
 
+    public static String getResetPasswordTemplate() {
+        return getTemplate(RESET_PASSWORD_TEMPLATE_PATH);
+    }
+
     public static String getNewUserTemplate() {
         return getTemplate(NEW_USER_TEMPLATE_PATH);
+    }
+
+    public static String getDeclinedRegistrationTemplate() {
+        return getTemplate(DECLINED_REGISTRATION_TEMPLATE_PATH);
     }
 }

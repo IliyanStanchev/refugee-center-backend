@@ -89,4 +89,23 @@ public class MailService {
         return true;
     }
 
+    public boolean sendDeclinedRegistrationEmail(User user) {
+
+        Message message = new Message();
+
+        message.setSender(environment.getProperty("spring.mail.username"));
+        message.setReceiver(user.getEmail());
+
+        message.setSubject("Declined registration");
+
+        final String messageContent = EmailTemplates.getDeclinedRegistrationTemplate()
+                .replace("{NAME}", user.getName());
+
+        message.setContent(messageContent);
+
+        if(!sendEmail(message))
+            return false;
+
+        return true;
+    }
 }

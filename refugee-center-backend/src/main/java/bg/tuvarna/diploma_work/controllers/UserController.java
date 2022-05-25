@@ -1,8 +1,10 @@
 package bg.tuvarna.diploma_work.controllers;
 
+import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
+import bg.tuvarna.diploma_work.models.AccountStatus;
 import bg.tuvarna.diploma_work.models.Address;
 import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
@@ -14,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,9 +38,23 @@ public class UserController {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private AccountStatusService accountStatusService;
+
     @PostMapping("/authenticate-user")
-    public User authenticateUser(@RequestBody User user) {
-        return userService.authenticateUser(user);
+    public ResponseEntity<User> authenticateUser(@RequestBody User user) {
+
+        User currentUser = userService.authenticateUser(user);
+        if( currentUser == null )
+            throw new CustomResponseStatusException("Wrong username or password");
+
+        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.BLOCKED )
+            throw new CustomResponseStatusException("Your account has been blocked by administrator");
+
+        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.PENDING_CONFIRMATION )
+            throw new CustomResponseStatusException("Your account is not confirmed by administrator. Please be patient.");
+
+        return new ResponseEntity<User>( currentUser, HttpStatus.OK );
     }
 
     @PostMapping("/forgot-password")
@@ -47,7 +62,7 @@ public class UserController {
 
         User currentUser = userService.getUserByEmail(user.getEmail());
         if( currentUser == null )
-            return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         final String newPassword = PasswordGeneratorUtil.generatePassword();
 
@@ -56,35 +71,42 @@ public class UserController {
         if( modifiedUser == null )
         {
             LogService.logErrorMessage("UserService::changePassword", modifiedUser.getEmail(), modifiedUser.getId());
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         User databaseUser = userService.getUser(modifiedUser.getId());
         if( databaseUser == null )
         {
             LogService.logErrorMessage("CustomerService::getCustomerByUserID", String.valueOf(modifiedUser.getId()), modifiedUser.getId());
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if( !mailService.sendResetPasswordEmail(databaseUser, newPassword) )
         {
             LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", modifiedUser.getId());
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/create-employee")
-    public ResponseEntity<Void> createEmployee(@RequestBody User user) {
+    public ResponseEntity<Void> createRefugee(@RequestBody User user) {
 
         user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
 
         validateUser(user);
 
+        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.APPROVED);
+        if( accountStatus == null ) {
+            LogService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        user.setAccountStatus(accountStatus);
+
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         user.setPassword(newPassword);
-        user.setCreatedOn(LocalDate.now());
 
         User savedUser = userService.createOrUpdateUser( user, RoleType.MODERATOR );
 
@@ -105,7 +127,7 @@ public class UserController {
 
     @PostMapping("/create-refugee")
     @Transactional
-    public ResponseEntity<Void> createEmployee(@RequestBody Refugee refugee) {
+    public ResponseEntity<Void> createRefugee(@RequestBody Refugee refugee) {
 
         refugee.getUser().setEmail(refugee.getUser().getEmail().toLowerCase(Locale.ROOT));
 
@@ -113,7 +135,15 @@ public class UserController {
 
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         refugee.getUser().setPassword(newPassword);
-        refugee.getUser().setCreatedOn(LocalDate.now());
+
+        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.APPROVED);
+
+        if( accountStatus == null ) {
+            LogService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        refugee.getUser().setAccountStatus(accountStatus);
 
         User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.CUSTOMER );
 
@@ -127,7 +157,7 @@ public class UserController {
        Address savedAddress = addressService.createAddress(refugee.getAddress());
         if( savedAddress == null ) {
             LogService.logErrorMessage("AddressService::createAddress", refugee.getAddress().toString());
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalErrorResponseStatusException();
         }
 
         refugee.setAddress(savedAddress);
@@ -136,13 +166,13 @@ public class UserController {
 
         if( savedRefugee == null ){
             LogService.logErrorMessage("RefugeeService::createRefugee", refugee.getUser().getEmail() );
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalErrorResponseStatusException();
         }
 
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )
         {
             LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", refugee.getId());
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<Void>(HttpStatus.OK);
@@ -158,50 +188,10 @@ public class UserController {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    @GetMapping("{pathname}/users")
-    public List<User> getAllUsers(@PathVariable String pathname) {
-        return userService.getAll();
-    }
+    @GetMapping("/get-pending-registrations")
+    public List<Refugee> getPendingRegistrations() {
 
-    @GetMapping("/{pathname}/users/{id}")
-    public User getUser(@PathVariable String pathname, @PathVariable long id) {
-
-        return userService.getUser(id);
-    }
-
-    @DeleteMapping("/{pathname}/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String pathname, @PathVariable long id) {
-
-        userService.deleteUser(id);
-
-        User user = userService.getUser(id);
-
-        return user == null ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
-
-    }
-
-    @PutMapping("/{pathname}/users/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String pathname, @PathVariable long id,
-                                           @RequestBody User user) {
-
-        User updatedUser = userService.createOrUpdateUser(user, RoleType.CUSTOMER);
-
-        return new ResponseEntity<User>(updatedUser, HttpStatus.OK);
-    }
-
-    @PostMapping("/{pathname}/login")
-    public ResponseEntity<Void> createUser(@PathVariable String pathname, @RequestBody User requestUser) {
-
-        User user = userService.getUserByEmail(requestUser.getEmail());
-        if (user != null)
-            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-
-        requestUser = userService.createOrUpdateUser(requestUser, RoleType.CUSTOMER);
-
-        if (requestUser == null)
-            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return refugeeService.getPendingRegistrations();
     }
 
     private void validateUser( User user ){

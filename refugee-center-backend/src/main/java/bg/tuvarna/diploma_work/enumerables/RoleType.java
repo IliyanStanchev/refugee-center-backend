@@ -4,5 +4,5 @@ public enum RoleType {
 
     ADMINISTRATOR
     , MODERATOR
-    , CUSTOMER
+    , REFUGEE
 }

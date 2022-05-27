@@ -4,6 +4,7 @@ import bg.tuvarna.diploma_work.enumerables.GroupType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -18,9 +19,12 @@ public class Group implements Serializable {
     @ManyToOne
     private User responsibleUser;
 
+    @Column(unique = true)
+    private String email;
+
     private GroupType groupType;
 
-    private Date creationDate;
+    private LocalDate creationDate;
 
     public Group() {
     }
@@ -41,11 +45,11 @@ public class Group implements Serializable {
         this.groupType = groupType;
     }
 
-    public Date getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -55,5 +59,13 @@ public class Group implements Serializable {
 
     public void setResponsibleUser(User responsibleUser) {
         this.responsibleUser = responsibleUser;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

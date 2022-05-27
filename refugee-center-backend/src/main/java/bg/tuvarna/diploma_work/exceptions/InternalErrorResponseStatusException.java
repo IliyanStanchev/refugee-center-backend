@@ -8,7 +8,7 @@ public class InternalErrorResponseStatusException extends ResponseStatusExceptio
 
     public InternalErrorResponseStatusException() {
         super(  HTTP_STATUS_INTERNAL_SERVER_ERROR_CODE
-                ,""
+                ,"Something went wrong. Please try again later."
                 ,null );
     }
 }

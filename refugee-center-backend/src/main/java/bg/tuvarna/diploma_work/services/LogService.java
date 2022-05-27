@@ -28,6 +28,12 @@ public class LogService {
         logRepository.save(log);
     }
 
+    public static void logErrorMessage(String functionName, Long context ){
+
+        Log log = generateErrorLog( functionName, String.valueOf(context) );
+        logRepository.save(log);
+    }
+
     public static void logErrorMessage(String functionName, String context, long currentUserID ){
 
         Log log = generateErrorLog( functionName, context );

@@ -26,7 +26,7 @@ public class UserService {
 
     public List<User> getAll() {
 
-        return  (List<User>) userRepository.getUsersByRole( RoleType.CUSTOMER );
+        return  (List<User>) userRepository.getUsersByRole( RoleType.REFUGEE);
     }
 
     public User getUser(long id ) {
@@ -100,5 +100,10 @@ public class UserService {
 
     public User getUserByIdentifier(String identifier) {
         return userRepository.getUserByIdentifier(identifier);
+    }
+
+    public List<User> getResponsibleUsers() {
+
+        return userRepository.getResponsibleUsers();
     }
 }

@@ -22,6 +22,12 @@ public class UserGroup implements Serializable {
     public UserGroup() {
     }
 
+    public UserGroup(User user, Group group) {
+        id = 0L;
+        this.user   = user;
+        this.group  = group;
+    }
+
     public Long getId() {
         return id;
     }

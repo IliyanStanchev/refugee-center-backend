@@ -41,6 +41,9 @@ public class UserController {
     @Autowired
     private AccountStatusService accountStatusService;
 
+    @Autowired
+    private GroupService groupService;
+
     @PostMapping("/authenticate-user")
     public ResponseEntity<User> authenticateUser(@RequestBody User user) {
 
@@ -116,6 +119,12 @@ public class UserController {
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        if( !groupService.addEmployeeToGroups(savedUser))
+        {
+            LogService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail() );
+            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )
         {
             LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", user.getId());
@@ -145,7 +154,7 @@ public class UserController {
 
         refugee.getUser().setAccountStatus(accountStatus);
 
-        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.CUSTOMER );
+        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.REFUGEE);
 
         if( savedUser == null ) {
             LogService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );
@@ -165,8 +174,14 @@ public class UserController {
         Refugee savedRefugee = refugeeService.createRefugee( refugee );
 
         if( savedRefugee == null ){
-            LogService.logErrorMessage("RefugeeService::createRefugee", refugee.getUser().getEmail() );
+            LogService.logErrorMessage("RefugeeService::createRefugee",  refugee.getUser().getEmail() );
             throw new InternalErrorResponseStatusException();
+        }
+
+        if( !groupService.addRefugeeToGroups(refugee.getUser()))
+        {
+            LogService.logErrorMessage("GroupService::addRefugeeToGroups",  refugee.getUser().getEmail() );
+            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )
@@ -188,12 +203,6 @@ public class UserController {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    @GetMapping("/get-pending-registrations")
-    public List<Refugee> getPendingRegistrations() {
-
-        return refugeeService.getPendingRegistrations();
-    }
-
     private void validateUser( User user ){
 
         User currentUser = userService.getUserByEmail(user.getEmail());
@@ -203,5 +212,11 @@ public class UserController {
         currentUser = userService.getUserByIdentifier(user.getIdentifier());
         if( currentUser != null )
             throw new CustomResponseStatusException("User with this identifier already exists");
+    }
+
+    @GetMapping("/get-responsible-users")
+    public List<User> getResponsibleUsers(){
+
+        return userService.getResponsibleUsers();
     }
 }

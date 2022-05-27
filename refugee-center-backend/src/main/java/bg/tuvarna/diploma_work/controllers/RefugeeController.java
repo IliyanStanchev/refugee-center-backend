@@ -3,7 +3,6 @@ package bg.tuvarna.diploma_work.controllers;
 import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.AccountStatus;
 import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.services.*;
@@ -12,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,6 +30,12 @@ public class RefugeeController {
 
     @Autowired
     private UserService userService;
+
+    @GetMapping("/get-pending-registrations")
+    public List<Refugee> getPendingRegistrations() {
+
+        return refugeeService.getPendingRegistrations();
+    }
 
     @PostMapping("/delete-pending-registrations")
     @Transactional
@@ -92,7 +94,7 @@ public class RefugeeController {
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
-        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.CUSTOMER );
+        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.REFUGEE);
 
         if( savedUser == null ){
             LogService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );

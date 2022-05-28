@@ -4,5 +4,4 @@ public enum MessageType {
 
     INFORMATIVE
     , IMPORTANT
-    , NO_REPLY
 }

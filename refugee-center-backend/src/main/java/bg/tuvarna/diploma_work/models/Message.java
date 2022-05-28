@@ -1,8 +1,10 @@
 package bg.tuvarna.diploma_work.models;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -11,29 +13,37 @@ public class Message implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition ="serial")
+    @Column(columnDefinition = "serial")
     private Long id;
 
-    private String sender;
+    @OneToOne
+    private User sender;
 
-    private String receiver;
+    private MessageType messageType;
 
     private String subject;
 
     private String content;
 
-    private MessageType messageType;
+    private LocalDate dateReceived;
 
-    public Message(){
-
+    public Message() {
     }
 
-    public Message(String from, String to, String subject, String content, MessageType messageType) {
-        this.sender = from;
-        this.receiver = to;
+    public Message(Long id, User sender, MessageType messageType, String subject, String content) {
+        this.id = id;
+        this.sender = sender;
+        this.messageType = messageType;
         this.subject = subject;
         this.content = content;
-        this.messageType = messageType;
+    }
+
+    public LocalDate getDateReceived() {
+        return dateReceived;
+    }
+
+    public void setDateReceived(LocalDate dateReceived) {
+        this.dateReceived = dateReceived;
     }
 
     public Long getId() {
@@ -44,20 +54,20 @@ public class Message implements Serializable {
         this.id = id;
     }
 
-    public String getSender() {
+    public User getSender() {
         return sender;
     }
 
-    public void setSender(String from) {
-        this.sender = from;
+    public void setSender(User sender) {
+        this.sender = sender;
     }
 
-    public String getReceiver() {
-        return receiver;
+    public MessageType getMessageType() {
+        return messageType;
     }
 
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
     }
 
     public String getSubject() {
@@ -76,35 +86,17 @@ public class Message implements Serializable {
         this.content = content;
     }
 
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(MessageType messageType) {
-        this.messageType = messageType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
-        return Objects.equals(id, message.id) && Objects.equals(sender, message.sender) && Objects.equals(receiver, message.receiver) && Objects.equals(subject, message.subject) && Objects.equals(content, message.content) && messageType == message.messageType;
+        return Objects.equals(id, message.id) && Objects.equals(sender, message.sender) && messageType == message.messageType && Objects.equals(subject, message.subject) && Objects.equals(content, message.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sender, receiver, subject, content, messageType);
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
-                ", subject='" + subject + '\'' +
-                ", content='" + content + '\'' +
-                ", messageType=" + messageType +
-                '}';
+        return Objects.hash(id, sender, messageType, subject, content);
     }
 }
+

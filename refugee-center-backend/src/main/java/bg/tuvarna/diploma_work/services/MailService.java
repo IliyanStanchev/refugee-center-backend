@@ -1,7 +1,7 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.helpers.EmailTemplates;
-import bg.tuvarna.diploma_work.models.Message;
+import bg.tuvarna.diploma_work.storages.MailMessage;
 import bg.tuvarna.diploma_work.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -22,7 +22,7 @@ public class MailService {
     @Autowired
     JavaMailSender javaMailSender;
 
-    public boolean sendEmail(Message message) {
+    public boolean sendEmail(MailMessage message) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
         try {
@@ -49,7 +49,7 @@ public class MailService {
 
     public boolean sendResetPasswordEmail(User user, String newPassword) {
 
-        Message message = new Message();
+        MailMessage message = new MailMessage();
 
         message.setSender(environment.getProperty("spring.mail.username"));
         message.setReceiver(user.getEmail());
@@ -70,7 +70,7 @@ public class MailService {
 
     public boolean sendNewUserEmail(User user, String newPassword) {
 
-        Message message = new Message();
+        MailMessage message = new MailMessage();
 
         message.setSender(environment.getProperty("spring.mail.username"));
         message.setReceiver(user.getEmail());
@@ -91,19 +91,19 @@ public class MailService {
 
     public boolean sendDeclinedRegistrationEmail(User user) {
 
-        Message message = new Message();
+        MailMessage mailMessage = new MailMessage();
 
-        message.setSender(environment.getProperty("spring.mail.username"));
-        message.setReceiver(user.getEmail());
+        mailMessage.setSender(environment.getProperty("spring.mail.username"));
+        mailMessage.setReceiver(user.getEmail());
 
-        message.setSubject("Declined registration");
+        mailMessage.setSubject("Declined registration");
 
         final String messageContent = EmailTemplates.getDeclinedRegistrationTemplate()
                 .replace("{NAME}", user.getName());
 
-        message.setContent(messageContent);
+        mailMessage.setContent(messageContent);
 
-        if(!sendEmail(message))
+        if(!sendEmail(mailMessage))
             return false;
 
         return true;

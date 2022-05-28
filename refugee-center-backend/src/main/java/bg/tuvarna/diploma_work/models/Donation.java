@@ -18,13 +18,11 @@ public class Donation implements Serializable {
 
     private DonationType donationType;
 
+    private String name;
+
     private double quantity;
 
     private Unit unit;
-
-    private String donatorName;
-
-    private String donatorEmail;
 
     public Donation() {
 
@@ -34,8 +32,14 @@ public class Donation implements Serializable {
         this.donationType = donationType;
         this.quantity = quantity;
         this.unit = unit;
-        this.donatorName = donatorName;
-        this.donatorEmail = donatorEmail;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getId() {
@@ -70,33 +74,17 @@ public class Donation implements Serializable {
         this.unit = unit;
     }
 
-    public String getDonatorName() {
-        return donatorName;
-    }
-
-    public void setDonatorName(String donatorName) {
-        this.donatorName = donatorName;
-    }
-
-    public String getDonatorEmail() {
-        return donatorEmail;
-    }
-
-    public void setDonatorEmail(String donatorEmail) {
-        this.donatorEmail = donatorEmail;
-    }
-
     @Override
     public boolean equals(Object o) {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Donation donation = (Donation) o;
-        return Double.compare(donation.quantity, quantity) == 0 && Objects.equals(id, donation.id) && donationType == donation.donationType && unit == donation.unit && Objects.equals(donatorName, donation.donatorName) && Objects.equals(donatorEmail, donation.donatorEmail);
+        return Double.compare(donation.quantity, quantity) == 0 && Objects.equals(id, donation.id) && donationType == donation.donationType && unit == donation.unit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, donationType, quantity, unit, donatorName, donatorEmail);
+        return Objects.hash(id, donationType, quantity, unit );
     }
 }

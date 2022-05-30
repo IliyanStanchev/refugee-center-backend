@@ -1,7 +1,6 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.enumerables.GroupType;
-import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.models.Group;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.models.UserGroup;
@@ -10,7 +9,6 @@ import bg.tuvarna.diploma_work.repositories.UserGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,10 +98,10 @@ public class GroupService {
 
     public List<UserGroup> getUsersForAdding(Group group) {
 
-        if( group.getGroupType() == GroupType.COMMON )
+        if( group.getGroupType() == GroupType.Common)
             return userGroupRepository.getAllUsersForAdding(group.getId());
 
-        if( group.getGroupType() == GroupType.EMPLOYEES )
+        if( group.getGroupType() == GroupType.Employees)
             return userGroupRepository.getEmployeesForAdding(group.getId());
 
         return userGroupRepository.getRefugeesForAdding(group.getId());
@@ -136,15 +134,15 @@ public class GroupService {
 
     public boolean validateGroupType(Group group) {
 
-        if( group.getGroupType() == GroupType.COMMON )
+        if( group.getGroupType() == GroupType.Common)
             return true;
 
         long invalidUsersCount = 0;
 
-        if( group.getGroupType() == GroupType.EMPLOYEES )
+        if( group.getGroupType() == GroupType.Employees)
             invalidUsersCount = userGroupRepository.getRefugeesCount(group.getId());
 
-        if( group.getGroupType() == GroupType.REFUGEES )
+        if( group.getGroupType() == GroupType.Refugees)
             invalidUsersCount = userGroupRepository.getEmployeesCount(group.getId());
 
         if( invalidUsersCount > 0 )

@@ -30,7 +30,7 @@ public class DonationController {
         Donation moneyDonation = donationService.getMoneyDonation();
         if (moneyDonation == null)
         {
-            moneyDonation.setDonationType(DonationType.MONEY);
+            moneyDonation.setDonationType(DonationType.Money);
             moneyDonation.setQuantity(0);
             moneyDonation.setUnit(Unit.USD);
             moneyDonation.setName("Money donation");
@@ -88,6 +88,18 @@ public class DonationController {
         if( newDonor == null )
         {
             LogService.logErrorMessage("DonationService::saveDonor", newDonor.getEmail() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @PostMapping("/update-donation")
+    public ResponseEntity<Void> updateDonation(@RequestBody Donation donation) {
+
+        if( donationService.saveDonation(donation) == null )
+        {
+            LogService.logErrorMessage("DonationService::saveDonation", donation.getName());
             throw new InternalErrorResponseStatusException();
         }
 

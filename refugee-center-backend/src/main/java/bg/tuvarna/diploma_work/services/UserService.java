@@ -26,7 +26,7 @@ public class UserService {
 
     public List<User> getAll() {
 
-        return  (List<User>) userRepository.getUsersByRole( RoleType.REFUGEE);
+        return  (List<User>) userRepository.getUsersByRole( RoleType.Refugee);
     }
 
     public User getUser(long id ) {

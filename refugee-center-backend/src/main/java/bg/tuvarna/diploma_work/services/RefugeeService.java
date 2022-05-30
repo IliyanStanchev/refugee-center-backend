@@ -1,6 +1,7 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.models.Refugee;
+import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.repositories.RefugeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,12 @@ public class RefugeeService {
 
         return null;
     }
+
     public Refugee getRefugeeByUserID(Long id) {
         return refugeeRepository.getRefugeeByUserID(id);
     }
 
-    public Refugee createRefugee(Refugee refugee) {
+    public Refugee saveRefugee(Refugee refugee) {
 
         refugee.setId(0L);
 
@@ -36,5 +38,30 @@ public class RefugeeService {
 
     public List<Refugee> getPendingRegistrations() {
         return refugeeRepository.getPendingRegistrations();
+    }
+
+    public List<Refugee> getRefugeesInShelter(Long shelterId) {
+
+        return refugeeRepository.getRefugeesInShelter(shelterId);
+    }
+
+    public void removeRefugeeFromShelter(Long refugeeId) {
+
+        refugeeRepository.removeRefugeeFromShelter(refugeeId);
+    }
+
+    public List<Refugee> getUsersWithoutShelter() {
+
+        return refugeeRepository.getUsersWithoutShelter();
+    }
+
+    public Refugee getRefugeeByUserId(Long userId) {
+
+        return refugeeRepository.getRefugeeByUserID(userId);
+    }
+
+    public void addRefugeeToShelter(Long shelterId, Long refugeeId) {
+
+        refugeeRepository.addRefugeeToShelter(shelterId, refugeeId);
     }
 }

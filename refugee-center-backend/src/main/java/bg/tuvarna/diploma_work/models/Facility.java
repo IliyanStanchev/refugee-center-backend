@@ -24,7 +24,9 @@ public class Facility implements Serializable {
 
     private FacilityType facilityType;
 
-    private Date lastInventoryDate;
+    private long maxCapacity;
+
+    private long currentCapacity;
 
     public Facility() {
     }
@@ -61,12 +63,27 @@ public class Facility implements Serializable {
         this.facilityType = facilityType;
     }
 
-    public Date getLastInventoryDate() {
-        return lastInventoryDate;
+    public long getMaxCapacity() {
+        return maxCapacity;
     }
 
-    public void setLastInventoryDate(Date lastInventoryDate) {
-        this.lastInventoryDate = lastInventoryDate;
+    public void setMaxCapacity(long maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    public long getCurrentCapacity() {
+        return currentCapacity;
+    }
+
+    public void setCurrentCapacity(long currentCapacity) {
+        this.currentCapacity = currentCapacity;
+    }
+
+    public String getCapacity(){
+
+        double capacity = (double) currentCapacity / maxCapacity;
+        double percentage = capacity * 100;
+        return percentage + "/100";
     }
 
     @Override
@@ -74,11 +91,11 @@ public class Facility implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Facility facility = (Facility) o;
-        return Objects.equals(id, facility.id) && Objects.equals(responsibleUser, facility.responsibleUser) && facilityType == facility.facilityType && Objects.equals(lastInventoryDate, facility.lastInventoryDate);
+        return Objects.equals(id, facility.id) && Objects.equals(responsibleUser, facility.responsibleUser) && facilityType == facility.facilityType ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, responsibleUser, facilityType, lastInventoryDate);
+        return Objects.hash(id, responsibleUser, facilityType);
     }
 }

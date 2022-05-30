@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
 
-    @Query("SELECT f FROM Facility f WHERE f.facilityType = 1")
+    @Query("SELECT f FROM Facility f WHERE f.facilityType = 1 AND f.currentCapacity != f.maxCapacity")
     List<Facility> getAllShelters();
 }

@@ -23,6 +23,8 @@ public class Refugee implements Serializable {
     @ManyToOne
     private Facility facility;
 
+    private boolean removedFromFacility;
+
     @OneToOne
     private User user;
 
@@ -39,6 +41,14 @@ public class Refugee implements Serializable {
     public Refugee(String firstName, String lastName, String identifier, Long age, Address address) {
         this.age = age;
         this.address = address;
+    }
+
+    public boolean getRemovedFromFacility() {
+        return removedFromFacility;
+    }
+
+    public void setRemovedFromFacility(boolean removedFromFacility) {
+        this.removedFromFacility = removedFromFacility;
     }
 
     public String getDiseases() {

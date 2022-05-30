@@ -4,10 +4,7 @@ import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.AccountStatus;
-import bg.tuvarna.diploma_work.models.Address;
-import bg.tuvarna.diploma_work.models.Refugee;
-import bg.tuvarna.diploma_work.models.User;
+import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.utils.PasswordGeneratorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +41,9 @@ public class UserController {
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private FacilityService facilityService;
+
     @PostMapping("/authenticate-user")
     public ResponseEntity<User> authenticateUser(@RequestBody User user) {
 
@@ -51,10 +51,10 @@ public class UserController {
         if( currentUser == null )
             throw new CustomResponseStatusException("Wrong username or password");
 
-        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.BLOCKED )
+        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Blocked)
             throw new CustomResponseStatusException("Your account has been blocked by administrator");
 
-        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.PENDING_CONFIRMATION )
+        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Pending )
             throw new CustomResponseStatusException("Your account is not confirmed by administrator. Please be patient.");
 
         return new ResponseEntity<User>( currentUser, HttpStatus.OK );
@@ -100,7 +100,7 @@ public class UserController {
 
         validateUser(user);
 
-        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.APPROVED);
+        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.Approved);
         if( accountStatus == null ) {
             LogService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail() );
             throw new InternalErrorResponseStatusException();
@@ -111,7 +111,7 @@ public class UserController {
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         user.setPassword(newPassword);
 
-        User savedUser = userService.createOrUpdateUser( user, RoleType.MODERATOR );
+        User savedUser = userService.createOrUpdateUser( user, RoleType.Moderator);
 
         if( savedUser == null )
         {
@@ -145,7 +145,7 @@ public class UserController {
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
-        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.APPROVED);
+        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.Approved);
 
         if( accountStatus == null ) {
             LogService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
@@ -154,7 +154,7 @@ public class UserController {
 
         refugee.getUser().setAccountStatus(accountStatus);
 
-        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.REFUGEE);
+        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.Refugee);
 
         if( savedUser == null ) {
             LogService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );
@@ -163,7 +163,7 @@ public class UserController {
 
         refugee.setUser(savedUser);
 
-       Address savedAddress = addressService.createAddress(refugee.getAddress());
+       Address savedAddress = addressService.saveAddress(refugee.getAddress());
         if( savedAddress == null ) {
             LogService.logErrorMessage("AddressService::createAddress", refugee.getAddress().toString());
             throw new InternalErrorResponseStatusException();
@@ -171,7 +171,7 @@ public class UserController {
 
         refugee.setAddress(savedAddress);
 
-        Refugee savedRefugee = refugeeService.createRefugee( refugee );
+        Refugee savedRefugee = refugeeService.saveRefugee( refugee );
 
         if( savedRefugee == null ){
             LogService.logErrorMessage("RefugeeService::createRefugee",  refugee.getUser().getEmail() );
@@ -181,7 +181,21 @@ public class UserController {
         if( !groupService.addRefugeeToGroups(refugee.getUser()))
         {
             LogService.logErrorMessage("GroupService::addRefugeeToGroups",  refugee.getUser().getEmail() );
-            return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        Facility facility = facilityService.getById(refugee.getFacility().getId());
+        if( facility == null )
+        {
+            LogService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        facility.setCurrentCapacity(facility.getCurrentCapacity() + 1);
+        if( facilityService.saveFacility(facility) == null )
+        {
+            LogService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
+            throw new InternalErrorResponseStatusException();
         }
 
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )

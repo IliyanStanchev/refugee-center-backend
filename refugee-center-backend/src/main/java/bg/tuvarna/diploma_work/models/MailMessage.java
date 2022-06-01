@@ -1,11 +1,17 @@
-package bg.tuvarna.diploma_work.storages;
+package bg.tuvarna.diploma_work.models;
 
-import bg.tuvarna.diploma_work.enumerables.MessageType;
-
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Entity
+@Table(name = "MAIL_MESSAGES")
 public class MailMessage implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "serial")
+    private Long id;
 
     private String sender;
 
@@ -13,20 +19,30 @@ public class MailMessage implements Serializable {
 
     private String subject;
 
+    @Column(length = 100000)
     private String content;
 
-    private MessageType messageType;
+    private long threadId;
 
     public MailMessage(){
+        id = 0L;
 
     }
 
-    public MailMessage(String from, String to, String subject, String content, MessageType messageType) {
-        this.sender = from;
-        this.receiver = to;
-        this.subject = subject;
-        this.content = content;
-        this.messageType = messageType;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public long getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(long threadId) {
+        this.threadId = threadId;
     }
 
     public String getSender() {
@@ -61,25 +77,17 @@ public class MailMessage implements Serializable {
         this.content = content;
     }
 
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(MessageType messageType) {
-        this.messageType = messageType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MailMessage message = (MailMessage) o;
-        return Objects.equals(sender, message.sender) && Objects.equals(receiver, message.receiver) && Objects.equals(subject, message.subject) && Objects.equals(content, message.content) && messageType == message.messageType;
+        return Objects.equals(sender, message.sender) && Objects.equals(receiver, message.receiver) && Objects.equals(subject, message.subject) && Objects.equals(content, message.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sender, receiver, subject, content, messageType);
+        return Objects.hash(sender, receiver, subject, content);
     }
 
     @Override
@@ -88,8 +96,6 @@ public class MailMessage implements Serializable {
                 "sender='" + sender + '\'' +
                 ", receiver='" + receiver + '\'' +
                 ", subject='" + subject + '\'' +
-                ", content='" + content + '\'' +
-                ", messageType=" + messageType +
-                '}';
+                ", content='" + content;
     }
 }

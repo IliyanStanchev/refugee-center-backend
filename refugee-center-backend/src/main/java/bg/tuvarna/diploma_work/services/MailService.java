@@ -1,8 +1,9 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.helpers.EmailTemplates;
-import bg.tuvarna.diploma_work.storages.MailMessage;
+import bg.tuvarna.diploma_work.models.MailMessage;
 import bg.tuvarna.diploma_work.models.User;
+import bg.tuvarna.diploma_work.repositories.MailMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,12 +13,16 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.List;
 
 @Service
 public class MailService {
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private MailMessageRepository mailMessageRepository;
 
     @Autowired
     JavaMailSender javaMailSender;
@@ -103,9 +108,52 @@ public class MailService {
 
         mailMessage.setContent(messageContent);
 
-        if(!sendEmail(mailMessage))
-            return false;
+        mailMessageRepository.save(mailMessage);
 
         return true;
+    }
+
+    public boolean sendNewNotificationEmail(User user) {
+
+        MailMessage mailMessage = new MailMessage();
+
+        mailMessage.setSender(environment.getProperty("spring.mail.username"));
+        mailMessage.setReceiver(user.getEmail());
+
+        mailMessage.setSubject("New notification");
+
+        final String messageContent = EmailTemplates.getNewNotificationTemplate()
+                .replace("{NAME}", user.getName());
+
+        mailMessage.setContent(messageContent);
+
+        mailMessageRepository.save(mailMessage);
+
+        return true;
+    }
+
+    public List<MailMessage> getPendingMails(long threadId) {
+
+        return mailMessageRepository.getPendingMails(threadId);
+    }
+
+    public void deleteMessage(Long id) {
+
+        mailMessageRepository.deleteById(id);
+    }
+
+    public void reserveMailMessages(long threadId) {
+
+        mailMessageRepository.reserveMailMessages(threadId);
+    }
+
+    public void updateMailMessage(MailMessage message){
+
+        mailMessageRepository.save(message);
+    }
+
+    public void deleteMailMessages(long threadId) {
+
+        mailMessageRepository.deleteMailMessages(threadId);
     }
 }

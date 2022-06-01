@@ -1,13 +1,11 @@
 package bg.tuvarna.diploma_work.controllers;
 
+import bg.tuvarna.diploma_work.enumerables.MessageType;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.Message;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.models.UserMessage;
-import bg.tuvarna.diploma_work.services.GroupService;
-import bg.tuvarna.diploma_work.services.LogService;
-import bg.tuvarna.diploma_work.services.MessageService;
-import bg.tuvarna.diploma_work.services.UserService;
+import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.MailReceiver;
 import bg.tuvarna.diploma_work.storages.MessageData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,9 @@ public class MessageController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MailService mailService;
 
     @GetMapping("/get-send-messages/{id}")
     public List<UserMessage> getSendMessages(@PathVariable long id){
@@ -93,7 +94,7 @@ public class MessageController {
 
         }
 
-        if( receivers.size() > 0 )
+        if( receivers.size() < 0 )
             return new ResponseEntity<>(HttpStatus.OK);
 
         final long senderId = messageData.getMessage().getSender().getId();
@@ -120,6 +121,9 @@ public class MessageController {
                 LogService.logErrorMessage("MessageService::sendMessage", senderId );
                 throw new InternalErrorResponseStatusException();
             }
+
+            if( savedMessage.getMessageType() == MessageType.Important )
+                mailService.sendNewNotificationEmail(sender);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);

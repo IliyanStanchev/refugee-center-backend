@@ -5,4 +5,5 @@ public enum RoleType {
     Administrator
     , Moderator
     , Refugee
+    , System
 }

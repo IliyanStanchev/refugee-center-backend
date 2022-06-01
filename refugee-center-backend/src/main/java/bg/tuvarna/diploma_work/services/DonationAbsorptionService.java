@@ -22,6 +22,10 @@ public class DonationAbsorptionService {
         return donationAbsorptionRepository.getDonationAbsorptions(shelterId);
     }
 
+    public List<DonationAbsorption> getAbsorptions(Long donationId){
+        return donationAbsorptionRepository.getAbsorptions(donationId);
+    }
+
     public List<Donation> getNewShelterAbsorptions(Long shelterId) {
         return donationRepository.getNewShelterAbsorptions(shelterId);
     }

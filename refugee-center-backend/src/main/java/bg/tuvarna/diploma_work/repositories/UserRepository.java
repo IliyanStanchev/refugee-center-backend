@@ -21,4 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.role.roleType = 0 or u.role.roleType = 1 order by u.role.roleType")
     List<User> getResponsibleUsers();
+
+    @Query("SELECT u FROM User u WHERE u.role.roleType = 3")
+    User getSystemUser();
+
 }

@@ -9,6 +9,7 @@ import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,5 +106,9 @@ public class UserService {
     public List<User> getResponsibleUsers() {
 
         return userRepository.getResponsibleUsers();
+    }
+
+    public User updateUser(User user) {
+    	return userRepository.save(user);
     }
 }

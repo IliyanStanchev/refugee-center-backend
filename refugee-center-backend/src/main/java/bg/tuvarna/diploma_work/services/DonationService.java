@@ -51,4 +51,9 @@ public class DonationService {
 
         return donorRepository.save(donor);
     }
+
+    public List<Donation> getAllDonations() {
+
+        return donationRepository.findAll();
+    }
 }

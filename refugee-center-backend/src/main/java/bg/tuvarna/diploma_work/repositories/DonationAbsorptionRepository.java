@@ -12,4 +12,6 @@ public interface DonationAbsorptionRepository extends JpaRepository<DonationAbso
     @Query("SELECT d FROM DonationAbsorption d WHERE d.facility.id = ?1")
     List<DonationAbsorption> getDonationAbsorptions(Long shelterId);
 
+    @Query("SELECT d FROM DonationAbsorption d WHERE d.donation.id = ?1")
+    List<DonationAbsorption> getAbsorptions(Long donationId);
 }

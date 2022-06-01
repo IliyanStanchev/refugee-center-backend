@@ -5,7 +5,9 @@ import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.*;
+import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import bg.tuvarna.diploma_work.services.*;
+import bg.tuvarna.diploma_work.storages.AccountData;
 import bg.tuvarna.diploma_work.utils.PasswordGeneratorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,6 +59,12 @@ public class UserController {
 
         if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Pending )
             throw new CustomResponseStatusException("Your account is not confirmed by administrator. Please be patient.");
+
+        currentUser.getAccountStatus().setLastLogin(LocalDate.now());
+        AccountStatus accountStatus = accountStatusService.updateAccountStatus(currentUser.getAccountStatus());
+        currentUser.setAccountStatus(accountStatus);
+
+        userService.updateUser(currentUser);
 
         return new ResponseEntity<User>( currentUser, HttpStatus.OK );
     }
@@ -224,13 +233,51 @@ public class UserController {
             throw new CustomResponseStatusException("User with this email already exists");
 
         currentUser = userService.getUserByIdentifier(user.getIdentifier());
-        if( currentUser != null )
+        if (currentUser != null)
             throw new CustomResponseStatusException("User with this identifier already exists");
     }
 
     @GetMapping("/get-responsible-users")
-    public List<User> getResponsibleUsers(){
+    public List<User> getResponsibleUsers() {
 
         return userService.getResponsibleUsers();
     }
+
+    @GetMapping("/get-user/{id}")
+    public User getUser(@PathVariable("id") Long id) {
+        return userService.getUser(id);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody AccountData accountData) {
+
+        User user = userService.getUser(accountData.getId());
+        if (user == null) {
+            LogService.logErrorMessage("UserService::getUser", accountData.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        BCryptPasswordEncoderExtender encoder = new BCryptPasswordEncoderExtender();
+        if (!encoder.matches(accountData.getOldPassword(), user.getPassword()))
+            throw new CustomResponseStatusException("Old password is incorrect");
+
+        user.getAccountStatus().setLastPasswordChangeDate(LocalDate.now());
+
+        AccountStatus accountStatus = accountStatusService.updateAccountStatus(user.getAccountStatus());
+        if (accountStatus == null) {
+            LogService.logErrorMessage("AccountStatusService::updateAccountStatus", accountData.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        user.setAccountStatus(accountStatus);
+        user.setPassword(encoder.encode(accountData.getNewPassword()));
+        if (userService.updateUser(user) == null)
+        {
+            LogService.logErrorMessage("UserService::updateUser", accountData.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+    
 }

@@ -25,13 +25,7 @@ public class RefugeeService {
         return null;
     }
 
-    public Refugee getRefugeeByUserID(Long id) {
-        return refugeeRepository.getRefugeeByUserID(id);
-    }
-
     public Refugee saveRefugee(Refugee refugee) {
-
-        refugee.setId(0L);
 
         return refugeeRepository.save(refugee);
     }
@@ -63,5 +57,10 @@ public class RefugeeService {
     public void addRefugeeToShelter(Long shelterId, Long refugeeId) {
 
         refugeeRepository.addRefugeeToShelter(shelterId, refugeeId);
+    }
+
+    public Refugee getRefugeeByPhone(String phoneNumber) {
+
+        return refugeeRepository.getRefugeeByPhone(phoneNumber);
     }
 }

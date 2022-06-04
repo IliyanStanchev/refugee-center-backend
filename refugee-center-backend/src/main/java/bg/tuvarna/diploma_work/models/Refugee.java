@@ -140,4 +140,14 @@ public class Refugee implements Serializable {
 
         return user.getFirstName() + " " + user.getLastName();
     }
+
+    public String getAddressDetails() {
+
+        return address.getAddressDetails();
+    }
+
+    public String getShelterDetails() {
+
+        return facility.getAddress().getAddressDetails();
+    }
 }

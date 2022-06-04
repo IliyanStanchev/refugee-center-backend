@@ -1,5 +1,7 @@
 package bg.tuvarna.diploma_work.models;
 
+import com.neovisionaries.i18n.CountryCode;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -86,5 +88,12 @@ public class Address implements Serializable {
                 ", cityName='" + cityName + '\'' +
                 ", address='" + address + '\'' +
                 '}';
+    }
+
+    public String getAddressDetails() {
+
+        CountryCode countryCode = CountryCode.getByCode(countryIsoCode);
+
+        return countryCode.getName() + ", " + cityName + ", " + address;
     }
 }

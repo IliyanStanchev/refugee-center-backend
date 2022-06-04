@@ -8,6 +8,7 @@ import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.AccountData;
+import bg.tuvarna.diploma_work.storages.RefugeeRegistrationData;
 import bg.tuvarna.diploma_work.utils.PasswordGeneratorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -145,16 +146,32 @@ public class UserController {
 
     @PostMapping("/create-refugee")
     @Transactional
-    public ResponseEntity<Void> createRefugee(@RequestBody Refugee refugee) {
+    public ResponseEntity<RoleType> createRefugee(@RequestBody RefugeeRegistrationData refugeeRegistrationData) {
+
+        Refugee refugee = refugeeRegistrationData.getRefugee();
+
+        User employee = userService.getUser(refugeeRegistrationData.getEmployeeId());
+        if( employee == null )
+        {
+            LogService.logErrorMessage("UserService::getUser", String.valueOf(refugeeRegistrationData.getEmployeeId()), refugeeRegistrationData.getEmployeeId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        final RoleType roleType = employee.getRole().getRoleType();
 
         refugee.getUser().setEmail(refugee.getUser().getEmail().toLowerCase(Locale.ROOT));
 
         validateUser(refugee.getUser());
 
+        Refugee checkRefugee = refugeeService.getRefugeeByPhone( refugee.getPhoneNumber() );
+        if( checkRefugee != null )
+            throw new CustomResponseStatusException("Refugee with this phone number already exists");
+
         final String newPassword = PasswordGeneratorUtil.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
-        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.Approved);
+        AccountStatus accountStatus = accountStatusService
+                .createAccountStatus( roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved );
 
         if( accountStatus == null ) {
             LogService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
@@ -179,7 +196,7 @@ public class UserController {
         }
 
         refugee.setAddress(savedAddress);
-
+        refugee.setId(0L);
         Refugee savedRefugee = refugeeService.saveRefugee( refugee );
 
         if( savedRefugee == null ){
@@ -213,7 +230,7 @@ public class UserController {
             throw new InternalErrorResponseStatusException();
         }
 
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<RoleType>(roleType, HttpStatus.OK);
     }
 
     @PostMapping("/validate-user-creation")

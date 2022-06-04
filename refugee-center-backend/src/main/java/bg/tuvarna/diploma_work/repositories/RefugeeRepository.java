@@ -32,4 +32,7 @@ public interface RefugeeRepository extends JpaRepository<Refugee, Long> {
     @Modifying
     @Query(value="UPDATE REFUGEES SET REMOVED_FROM_FACILITY = FALSE, FACILITY_ID = ?1 WHERE ID = ?2", nativeQuery = true)
     void addRefugeeToShelter(Long shelterId, Long refugeeId);
+
+    @Query("SELECT r FROM Refugee r WHERE r.phoneNumber = ?1")
+    Refugee getRefugeeByPhone(String phoneNumber);
 }

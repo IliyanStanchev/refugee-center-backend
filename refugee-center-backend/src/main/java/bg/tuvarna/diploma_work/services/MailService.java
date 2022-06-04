@@ -2,6 +2,7 @@ package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.helpers.EmailTemplates;
 import bg.tuvarna.diploma_work.models.MailMessage;
+import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.repositories.MailMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +133,29 @@ public class MailService {
         return true;
     }
 
+    public boolean sendMedicalHelpRequestMail(Refugee refugee) {
+
+        MailMessage mailMessage = new MailMessage();
+
+        mailMessage.setSender(environment.getProperty("spring.mail.username"));
+        mailMessage.setReceiver(refugee.getFacility().getResponsibleUser().getEmail());
+
+        mailMessage.setSubject("Medical help request");
+
+        final String messageContent = EmailTemplates.getMedicalHelpRequestTemplate()
+                .replace("{NAME}", refugee.getFacility().getResponsibleUser().getName())
+                .replace("{REFUGEE_NAME}", refugee.getName())
+                .replace("{SHELTER}", refugee.getFacility().getFacilityInformation());
+
+
+        mailMessage.setContent(messageContent);
+
+        if(!sendEmail(mailMessage))
+            return false;
+
+        return true;
+    }
+
     public List<MailMessage> getPendingMails(long threadId) {
 
         return mailMessageRepository.getPendingMails(threadId);
@@ -156,4 +180,6 @@ public class MailService {
 
         mailMessageRepository.deleteMailMessages(threadId);
     }
+
+
 }

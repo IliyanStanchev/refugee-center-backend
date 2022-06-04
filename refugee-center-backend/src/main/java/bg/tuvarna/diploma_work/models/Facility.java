@@ -98,4 +98,9 @@ public class Facility implements Serializable {
     public int hashCode() {
         return Objects.hash(id, responsibleUser, facilityType);
     }
+
+    public CharSequence getFacilityInformation() {
+
+        return address.getCountryIsoCode() + ", " + address.getCityName() + ", " + address.getAddress();
+    }
 }

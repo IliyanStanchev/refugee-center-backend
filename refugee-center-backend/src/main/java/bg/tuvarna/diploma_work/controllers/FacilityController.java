@@ -3,9 +3,11 @@ package bg.tuvarna.diploma_work.controllers;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.Address;
 import bg.tuvarna.diploma_work.models.Facility;
+import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.services.AddressService;
 import bg.tuvarna.diploma_work.services.FacilityService;
 import bg.tuvarna.diploma_work.services.LogService;
+import bg.tuvarna.diploma_work.services.RefugeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ public class FacilityController {
 
     @Autowired
     AddressService addressService;
+
+    @Autowired
+    RefugeeService refugeeService;
 
     @GetMapping("/get-all-shelters")
     public List<Facility> getAllShelters() {
@@ -48,5 +53,18 @@ public class FacilityController {
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/get-shelters-for-transfer/{id}")
+    public List<Facility> getSheltersForTransfer(@PathVariable("id") Long id) {
+
+        Refugee refugee = refugeeService.getRefugeeByUserId(id);
+        if( refugee == null )
+        {
+            LogService.logErrorMessage("RefugeeService::getRefugeeByUserId",  id );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return facilityService.getSheltersForTransfer(refugee.getFacility().getId());
     }
 }

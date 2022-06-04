@@ -10,10 +10,11 @@ public class EmailTemplates {
     public static final String COMPANY_PHONE = "+359 08982231";
     public static final String COMPANY_EMAIL = "safe_shelter@sshelter.com";
 
-    public static final String RESET_PASSWORD_TEMPLATE_PATH = "src/main/resources/templates/resetEmailTemplate.html";
-    public static final String NEW_USER_TEMPLATE_PATH = "src/main/resources/templates/newUserEmailTemplate.html";
-    public static final String DECLINED_REGISTRATION_TEMPLATE_PATH = "src/main/resources/templates/declinedRegistrationTemplate.html";
-    public static final String NEW_NOTIFICATION_TEMPLATE_PATH = "src/main/resources/templates/newNotificationTemplate.html";
+    public static final String RESET_PASSWORD_TEMPLATE_PATH         = "src/main/resources/templates/resetEmailTemplate.html";
+    public static final String NEW_USER_TEMPLATE_PATH               = "src/main/resources/templates/newUserEmailTemplate.html";
+    public static final String DECLINED_REGISTRATION_TEMPLATE_PATH  = "src/main/resources/templates/declinedRegistrationTemplate.html";
+    public static final String NEW_NOTIFICATION_TEMPLATE_PATH       = "src/main/resources/templates/newNotificationTemplate.html";
+    public static final String MEDICAL_HELP_REQUEST_TEMPLATE_PATH   = "src/main/resources/templates/medicalHelpRequestTemplate.html";
 
     private static String getTemplate(String htmlPath) {
 
@@ -53,5 +54,9 @@ public class EmailTemplates {
 
     public static String getNewNotificationTemplate() {
         return getTemplate(NEW_NOTIFICATION_TEMPLATE_PATH);
+    }
+
+    public static String getMedicalHelpRequestTemplate() {
+        return getTemplate(MEDICAL_HELP_REQUEST_TEMPLATE_PATH);
     }
 }

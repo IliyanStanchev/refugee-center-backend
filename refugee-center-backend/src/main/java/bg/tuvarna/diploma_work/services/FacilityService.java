@@ -34,4 +34,8 @@ public class FacilityService {
     public Facility saveFacility(Facility facility) {
         return facilityRepository.save(facility);
     }
+
+    public List<Facility> getSheltersForTransfer(Long id) {
+        return facilityRepository.getSheltersForTransfer(id);
+    }
 }

@@ -196,4 +196,29 @@ public class RefugeeController {
 
     	return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/get-refugee-by-user-id/{userId}")
+    public ResponseEntity<Refugee> getRefugeeByUserId(@PathVariable Long userId) {
+
+        Refugee refugee = refugeeService.getRefugeeByUserId(userId);
+        if( refugee == null ) {
+            LogService.logErrorMessage("RefugeeService::getRefugeeByUserId", userId);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(refugee, HttpStatus.OK);
+    }
+
+    @PutMapping("/update-refugee")
+    @Transactional
+    public ResponseEntity<Refugee> updateRefugee(@RequestBody Refugee refugee) {
+
+        Refugee updatedRefugee = refugeeService.saveRefugee(refugee);
+        if( updatedRefugee == null ) {
+            LogService.logErrorMessage("RefugeeService::saveRefugee", refugee.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(updatedRefugee, HttpStatus.OK);
+    }
 }

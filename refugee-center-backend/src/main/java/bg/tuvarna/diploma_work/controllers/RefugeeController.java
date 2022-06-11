@@ -7,14 +7,13 @@ import bg.tuvarna.diploma_work.models.Facility;
 import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.services.*;
-import bg.tuvarna.diploma_work.utils.PasswordGeneratorUtil;
+import bg.tuvarna.diploma_work.utils.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Ref;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:3000"})
@@ -35,6 +34,9 @@ public class RefugeeController {
 
     @Autowired
     private FacilityService facilityService;
+
+    @Autowired
+    private LogService logService;
 
     @GetMapping("/get-pending-registrations")
     public List<Refugee> getPendingRegistrations() {
@@ -92,22 +94,22 @@ public class RefugeeController {
         refugee.getUser().getAccountStatus().setAccountStatusType(AccountStatusType.Approved);
 
         if (accountStatusService.updateAccountStatus(refugee.getUser().getAccountStatus()) == null) {
-            LogService.logErrorMessage("RefugeeService::declinePendingRegistration", refugee.getUser().getEmail());
+            logService.logErrorMessage("RefugeeService::declinePendingRegistration", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
-        final String newPassword = PasswordGeneratorUtil.generatePassword();
+        final String newPassword = CharSequenceGenerator.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
         User savedUser = userService.createOrUpdateUser(refugee.getUser(), RoleType.Refugee);
 
         if (savedUser == null) {
-            LogService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail());
+            logService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
         if (!mailService.sendNewUserEmail(refugee.getUser(), newPassword)) {
-            LogService.logErrorMessage("MailService::sendDeclinedRegistrationEmail", "", refugee.getId());
+            logService.logErrorMessage("MailService::sendDeclinedRegistrationEmail", "");
             throw new InternalErrorResponseStatusException();
         }
 
@@ -119,12 +121,12 @@ public class RefugeeController {
         refugee.getUser().getAccountStatus().setAccountStatusType(AccountStatusType.Declined);
 
         if (accountStatusService.updateAccountStatus(refugee.getUser().getAccountStatus()) == null) {
-            LogService.logErrorMessage("RefugeeService::declinePendingRegistration", refugee.getUser().getEmail());
+            logService.logErrorMessage("RefugeeService::declinePendingRegistration", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
         if (!mailService.sendDeclinedRegistrationEmail(refugee.getUser())) {
-            LogService.logErrorMessage("MailService::sendDeclinedRegistrationEmail", "", refugee.getId());
+            logService.logErrorMessage("MailService::sendDeclinedRegistrationEmail", "");
             throw new InternalErrorResponseStatusException();
         }
 
@@ -144,14 +146,14 @@ public class RefugeeController {
         Refugee refugee = refugeeService.getRefugeeByID(refugeeId);
 
         if( refugee == null ) {
-            LogService.logErrorMessage("RefugeeService::getRefugeeByID", refugeeId);
+            logService.logErrorMessage("RefugeeService::getRefugeeByID", refugeeId);
             throw new InternalErrorResponseStatusException();
         }
 
         Facility facility = facilityService.getById(refugee.getFacility().getId());
         if( facility == null )
         {
-            LogService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -159,7 +161,7 @@ public class RefugeeController {
 
         if( facilityService.saveFacility(facility) == null )
         {
-            LogService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -179,14 +181,14 @@ public class RefugeeController {
 
         Refugee refugee = refugeeService.getRefugeeByUserId(userId);
         if (refugee == null){
-            LogService.logErrorMessage("RefugeeService::getRefugeeByUserId", userId);
+            logService.logErrorMessage("RefugeeService::getRefugeeByUserId", userId);
             throw new InternalErrorResponseStatusException();
         }
 
         Facility facility = facilityService.getById(shelterId);
         if( facility == null )
         {
-            LogService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -202,23 +204,25 @@ public class RefugeeController {
 
         Refugee refugee = refugeeService.getRefugeeByUserId(userId);
         if( refugee == null ) {
-            LogService.logErrorMessage("RefugeeService::getRefugeeByUserId", userId);
+            logService.logErrorMessage("RefugeeService::getRefugeeByUserId", userId);
             throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<>(refugee, HttpStatus.OK);
     }
 
-    @PutMapping("/update-refugee")
+    @PatchMapping("/update-refugee")
     @Transactional
     public ResponseEntity<Refugee> updateRefugee(@RequestBody Refugee refugee) {
 
         Refugee updatedRefugee = refugeeService.saveRefugee(refugee);
         if( updatedRefugee == null ) {
-            LogService.logErrorMessage("RefugeeService::saveRefugee", refugee.getId());
+            logService.logErrorMessage("RefugeeService::saveRefugee", refugee.getId());
             throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<>(updatedRefugee, HttpStatus.OK);
     }
+
+
 }

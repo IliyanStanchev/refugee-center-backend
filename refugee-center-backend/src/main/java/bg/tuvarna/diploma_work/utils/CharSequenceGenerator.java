@@ -6,7 +6,7 @@ import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 import static org.passay.IllegalCharacterRule.ERROR_CODE;
 
-public class PasswordGeneratorUtil {
+public class CharSequenceGenerator {
 
     public static String generatePassword() {
 
@@ -37,6 +37,22 @@ public class PasswordGeneratorUtil {
 
         String password = gen.generatePassword(15, splCharRule, lowerCaseRule,
                 upperCaseRule, digitRule);
+
+        return password;
+    }
+
+    public static String generateVerificationCode() {
+
+        PasswordGenerator passwordGenerator = new PasswordGenerator();
+        CharacterData upperCaseChars = EnglishCharacterData.UpperCase;
+        CharacterRule upperCaseRule = new CharacterRule(upperCaseChars);
+        upperCaseRule.setNumberOfCharacters(4);
+
+        CharacterData digitChars = EnglishCharacterData.Digit;
+        CharacterRule digitRule = new CharacterRule(digitChars);
+        digitRule.setNumberOfCharacters(4);
+
+        String password = passwordGenerator.generatePassword(8, upperCaseRule, digitRule);
 
         return password;
     }

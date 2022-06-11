@@ -4,6 +4,7 @@ import bg.tuvarna.diploma_work.enumerables.RequestStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "LOCATION_CHANGE_REQUESTS")
@@ -24,9 +25,19 @@ public class LocationChangeRequest implements Serializable {
 
     RequestStatus requestStatus;
 
-    String reason;
+    String description;
+
+    LocalDateTime dateCreated;
 
     public LocationChangeRequest() {
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
     }
 
     public Long getId() {
@@ -45,12 +56,12 @@ public class LocationChangeRequest implements Serializable {
         this.requestStatus = requestType;
     }
 
-    public String getReason() {
-        return reason;
+    public String getDescription() {
+        return description;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Facility getShelter() {

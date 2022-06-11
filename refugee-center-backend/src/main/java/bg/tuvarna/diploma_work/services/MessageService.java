@@ -1,7 +1,6 @@
 package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
-import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.repositories.GroupRepository;
 import bg.tuvarna.diploma_work.repositories.MessageRepository;
@@ -9,16 +8,11 @@ import bg.tuvarna.diploma_work.repositories.UserMessageRepository;
 import bg.tuvarna.diploma_work.repositories.UserRepository;
 import bg.tuvarna.diploma_work.storages.MailReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class MessageService {
@@ -34,6 +28,9 @@ public class MessageService {
 
     @Autowired
     private UserMessageRepository userMessageRepository;
+
+    @Autowired
+    private LogService logService;
 
 
     public List<UserMessage> getSendMessages(long userId) {
@@ -135,7 +132,7 @@ public class MessageService {
         User sender = userRepository.getSystemUser();
         if( sender == null )
         {
-            LogService.logErrorMessage("UserRepository::getSystemUser", "System user not found");
+            logService.logErrorMessage("UserRepository::getSystemUser", "System user not found");
             return;
         }
         message.setSender(sender);
@@ -143,7 +140,7 @@ public class MessageService {
         Message savedMessage = messageRepository.save(message);
         if( savedMessage == null )
         {
-            LogService.logErrorMessage("MessageRepository::saveMessage", sender.getId() );
+            logService.logErrorMessage("MessageRepository::saveMessage", sender.getId() );
             return;
         }
 
@@ -151,7 +148,7 @@ public class MessageService {
 
             if( userMessageRepository.save(new UserMessage(savedMessage, receiver)) == null )
             {
-                LogService.logErrorMessage("UserMessageRepository::save", sender.getId() );
+                logService.logErrorMessage("UserMessageRepository::save", sender.getId() );
                 return;
             }
         }

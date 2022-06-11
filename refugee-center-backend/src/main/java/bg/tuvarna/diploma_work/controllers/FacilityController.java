@@ -20,13 +20,16 @@ import java.util.List;
 public class FacilityController {
 
     @Autowired
-    FacilityService facilityService;
+    private FacilityService facilityService;
 
     @Autowired
-    AddressService addressService;
+    private AddressService addressService;
 
     @Autowired
-    RefugeeService refugeeService;
+    private RefugeeService refugeeService;
+
+    @Autowired
+    private LogService logService;
 
     @GetMapping("/get-all-shelters")
     public List<Facility> getAllShelters() {
@@ -48,7 +51,7 @@ public class FacilityController {
 
         if( facilityService.saveFacility(facility) == null )
         {
-            LogService.logErrorMessage("FacilityService::saveFacility",  facility.getAddress().toString() );
+            logService.logErrorMessage("FacilityService::saveFacility",  facility.getAddress().toString() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -61,7 +64,7 @@ public class FacilityController {
         Refugee refugee = refugeeService.getRefugeeByUserId(id);
         if( refugee == null )
         {
-            LogService.logErrorMessage("RefugeeService::getRefugeeByUserId",  id );
+            logService.logErrorMessage("RefugeeService::getRefugeeByUserId",  id );
             throw new InternalErrorResponseStatusException();
         }
 

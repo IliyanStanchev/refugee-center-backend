@@ -28,7 +28,17 @@ public class Facility implements Serializable {
 
     private long currentCapacity;
 
+    private String phoneNumber;
+
     public Facility() {
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public Address getAddress() {

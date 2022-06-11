@@ -6,5 +6,6 @@ public enum AccountStatusType {
     , Declined
     , Blocked
     , Approved
+    , Verified
 }
 

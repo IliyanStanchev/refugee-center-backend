@@ -25,9 +25,6 @@ public class Log implements Serializable {
 
     private String content;
 
-    @OneToOne
-    private User user;
-
     public Log(){
 
     }
@@ -36,7 +33,6 @@ public class Log implements Serializable {
         this.logType = logType;
         this.timestamp = timestamp;
         this.content = content;
-        this.user = user;
     }
 
     @Override
@@ -44,12 +40,12 @@ public class Log implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Log log = (Log) o;
-        return Objects.equals(id, log.id) && logType == log.logType && Objects.equals(timestamp, log.timestamp) && Objects.equals(content, log.content) && Objects.equals(user, log.user);
+        return Objects.equals(id, log.id) && logType == log.logType && Objects.equals(timestamp, log.timestamp) && Objects.equals(content, log.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, logType, timestamp, content, user);
+        return Objects.hash(id, logType, timestamp, content);
     }
 
     public Long getId() {
@@ -82,13 +78,5 @@ public class Log implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }

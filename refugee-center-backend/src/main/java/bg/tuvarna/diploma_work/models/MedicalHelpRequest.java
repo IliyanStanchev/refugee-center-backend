@@ -1,7 +1,10 @@
 package bg.tuvarna.diploma_work.models;
 
+import bg.tuvarna.diploma_work.enumerables.RequestStatus;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "MEDICAL_HELP_REQUESTS")
@@ -18,7 +21,17 @@ public class MedicalHelpRequest implements Serializable {
 
     String description;
 
+    LocalDateTime dateCreated;
+
     public MedicalHelpRequest() {
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
     }
 
     public Long getId() {
@@ -43,5 +56,10 @@ public class MedicalHelpRequest implements Serializable {
 
     public void setRefugee(Refugee refugee) {
         this.refugee = refugee;
+    }
+
+    public RequestStatus getRequestStatus(){
+
+        return RequestStatus.Accepted;
     }
 }

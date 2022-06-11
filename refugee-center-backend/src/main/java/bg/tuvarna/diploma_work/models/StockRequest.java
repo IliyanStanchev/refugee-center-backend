@@ -4,6 +4,7 @@ import bg.tuvarna.diploma_work.enumerables.RequestStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "STOCK_REQUESTS")
@@ -24,7 +25,18 @@ public class StockRequest implements Serializable {
 
     String reason;
 
+    LocalDateTime dateCreated;
+
+
     public StockRequest() {
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
     }
 
     public RequestStatus getRequestStatus() {

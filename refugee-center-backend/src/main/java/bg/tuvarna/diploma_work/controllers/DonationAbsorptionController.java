@@ -19,10 +19,13 @@ import java.util.List;
 public class DonationAbsorptionController {
 
     @Autowired
-    DonationAbsorptionService donationAbsorptionService;
+    private DonationAbsorptionService donationAbsorptionService;
 
     @Autowired
-    FacilityService facilityService;
+    private FacilityService facilityService;
+
+    @Autowired
+    private LogService logService;
 
     @GetMapping("/get-donation-absorptions/{id}")
     public List<DonationAbsorption> getDonationAbsorptions(@PathVariable Long id){
@@ -40,13 +43,13 @@ public class DonationAbsorptionController {
         Facility facility = facilityService.getById(donationAbsorption.getFacility().getId());
         if( facility == null )
         {
-            LogService.logErrorMessage("FacilityService::getById", donationAbsorption.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::getById", donationAbsorption.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
         if( donationAbsorptionService.saveDonationAbsorption(donationAbsorption) == null )
         {
-            LogService.logErrorMessage("DonationAbsorptionService::saveDonationAbsorption", donationAbsorption.getId() );
+            logService.logErrorMessage("DonationAbsorptionService::saveDonationAbsorption", donationAbsorption.getId() );
             throw new InternalErrorResponseStatusException();
         }
 

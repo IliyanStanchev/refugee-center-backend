@@ -9,7 +9,7 @@ import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.AccountData;
 import bg.tuvarna.diploma_work.storages.RefugeeRegistrationData;
-import bg.tuvarna.diploma_work.utils.PasswordGeneratorUtil;
+import bg.tuvarna.diploma_work.utils.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +48,9 @@ public class UserController {
     @Autowired
     private FacilityService facilityService;
 
+    @Autowired
+    private LogService logService;
+
     @PostMapping("/authenticate-user")
     public ResponseEntity<User> authenticateUser(@RequestBody User user) {
 
@@ -77,26 +80,26 @@ public class UserController {
         if( currentUser == null )
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-        final String newPassword = PasswordGeneratorUtil.generatePassword();
+        final String newPassword = CharSequenceGenerator.generatePassword();
 
         User modifiedUser = userService.changePassword(currentUser, newPassword);
 
         if( modifiedUser == null )
         {
-            LogService.logErrorMessage("UserService::changePassword", modifiedUser.getEmail(), modifiedUser.getId());
+            logService.logErrorMessage("UserService::changePassword", modifiedUser.getEmail());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         User databaseUser = userService.getUser(modifiedUser.getId());
         if( databaseUser == null )
         {
-            LogService.logErrorMessage("CustomerService::getCustomerByUserID", String.valueOf(modifiedUser.getId()), modifiedUser.getId());
+            logService.logErrorMessage("CustomerService::getCustomerByUserID", String.valueOf(modifiedUser.getId()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if( !mailService.sendResetPasswordEmail(databaseUser, newPassword) )
         {
-            LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", modifiedUser.getId());
+            logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -110,34 +113,34 @@ public class UserController {
 
         validateUser(user);
 
-        AccountStatus accountStatus = accountStatusService.createAccountStatus(AccountStatusType.Approved);
+        AccountStatus accountStatus = accountStatusService.saveAccountStatus(AccountStatusType.Verified);
         if( accountStatus == null ) {
-            LogService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail() );
+            logService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
         user.setAccountStatus(accountStatus);
 
-        final String newPassword = PasswordGeneratorUtil.generatePassword();
+        final String newPassword = CharSequenceGenerator.generatePassword();
         user.setPassword(newPassword);
 
         User savedUser = userService.createOrUpdateUser( user, RoleType.Moderator);
 
         if( savedUser == null )
         {
-            LogService.logErrorMessage("UserService::createOrUpdateUser", user.getEmail() );
+            logService.logErrorMessage("UserService::createOrUpdateUser", user.getEmail() );
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if( !groupService.addEmployeeToGroups(savedUser))
         {
-            LogService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail() );
+            logService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail() );
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )
         {
-            LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", user.getId());
+            logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -153,7 +156,7 @@ public class UserController {
         User employee = userService.getUser(refugeeRegistrationData.getEmployeeId());
         if( employee == null )
         {
-            LogService.logErrorMessage("UserService::getUser", String.valueOf(refugeeRegistrationData.getEmployeeId()), refugeeRegistrationData.getEmployeeId());
+            logService.logErrorMessage("UserService::getUser", String.valueOf(refugeeRegistrationData.getEmployeeId()));
             throw new InternalErrorResponseStatusException();
         }
 
@@ -167,14 +170,14 @@ public class UserController {
         if( checkRefugee != null )
             throw new CustomResponseStatusException("Refugee with this phone number already exists");
 
-        final String newPassword = PasswordGeneratorUtil.generatePassword();
+        final String newPassword = CharSequenceGenerator.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
         AccountStatus accountStatus = accountStatusService
-                .createAccountStatus( roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved );
+                .saveAccountStatus( roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved );
 
         if( accountStatus == null ) {
-            LogService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
+            logService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -183,7 +186,7 @@ public class UserController {
         User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.Refugee);
 
         if( savedUser == null ) {
-            LogService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );
+            logService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -191,7 +194,7 @@ public class UserController {
 
        Address savedAddress = addressService.saveAddress(refugee.getAddress());
         if( savedAddress == null ) {
-            LogService.logErrorMessage("AddressService::createAddress", refugee.getAddress().toString());
+            logService.logErrorMessage("AddressService::createAddress", refugee.getAddress().toString());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -200,33 +203,33 @@ public class UserController {
         Refugee savedRefugee = refugeeService.saveRefugee( refugee );
 
         if( savedRefugee == null ){
-            LogService.logErrorMessage("RefugeeService::createRefugee",  refugee.getUser().getEmail() );
+            logService.logErrorMessage("RefugeeService::createRefugee",  refugee.getUser().getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
         if( !groupService.addRefugeeToGroups(refugee.getUser()))
         {
-            LogService.logErrorMessage("GroupService::addRefugeeToGroups",  refugee.getUser().getEmail() );
+            logService.logErrorMessage("GroupService::addRefugeeToGroups",  refugee.getUser().getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
         Facility facility = facilityService.getById(refugee.getFacility().getId());
         if( facility == null )
         {
-            LogService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
         facility.setCurrentCapacity(facility.getCurrentCapacity() + 1);
         if( facilityService.saveFacility(facility) == null )
         {
-            LogService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
+            logService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
             throw new InternalErrorResponseStatusException();
         }
 
         if( !mailService.sendNewUserEmail(savedUser, newPassword) )
         {
-            LogService.logErrorMessage("MailService::sendResetPasswordEmail", "", refugee.getId());
+            logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             throw new InternalErrorResponseStatusException();
         }
 
@@ -270,7 +273,7 @@ public class UserController {
 
         User user = userService.getUser(accountData.getId());
         if (user == null) {
-            LogService.logErrorMessage("UserService::getUser", accountData.getId());
+            logService.logErrorMessage("UserService::getUser", accountData.getId());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -282,7 +285,7 @@ public class UserController {
 
         AccountStatus accountStatus = accountStatusService.updateAccountStatus(user.getAccountStatus());
         if (accountStatus == null) {
-            LogService.logErrorMessage("AccountStatusService::updateAccountStatus", accountData.getId());
+            logService.logErrorMessage("AccountStatusService::updateAccountStatus", accountData.getId());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -290,7 +293,7 @@ public class UserController {
         user.setPassword(encoder.encode(accountData.getNewPassword()));
         if (userService.updateUser(user) == null)
         {
-            LogService.logErrorMessage("UserService::updateUser", accountData.getId());
+            logService.logErrorMessage("UserService::updateUser", accountData.getId());
             throw new InternalErrorResponseStatusException();
         }
 

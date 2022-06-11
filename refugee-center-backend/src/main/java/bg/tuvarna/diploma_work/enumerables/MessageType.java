@@ -4,4 +4,5 @@ public enum MessageType {
 
     Informative
     , Important
+    , Question
 }

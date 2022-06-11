@@ -26,7 +26,10 @@ public class MailService {
     private MailMessageRepository mailMessageRepository;
 
     @Autowired
-    JavaMailSender javaMailSender;
+    private JavaMailSender javaMailSender;
+
+    @Autowired
+    private LogService logService;
 
     public boolean sendEmail(MailMessage message) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -45,7 +48,7 @@ public class MailService {
 
         }
         catch (MessagingException e) {
-            LogService.logErrorMessage("sendEmail", message.toString());
+            logService.logErrorMessage("sendEmail", message.toString());
             e.printStackTrace();
             return false;
         }

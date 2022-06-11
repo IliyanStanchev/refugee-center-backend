@@ -22,7 +22,10 @@ import java.util.List;
 public class DonationController {
 
     @Autowired
-    DonationService donationService;
+    private DonationService donationService;
+
+    @Autowired
+    private LogService logService;
 
     @PostMapping("/donate-money")
     public ResponseEntity<Void> donateMoney(@RequestBody Donation donation) {
@@ -43,7 +46,7 @@ public class DonationController {
 
         if( moneyDonation == null )
         {
-            LogService.logErrorMessage("DonationService::saveDonation", String.valueOf(donation.getQuantity()) + donation.getUnit());
+            logService.logErrorMessage("DonationService::saveDonation", String.valueOf(donation.getQuantity()) + donation.getUnit());
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -71,7 +74,7 @@ public class DonationController {
         newDonation = donationService.saveDonation(newDonation);
         if( newDonation == null ){
 
-            LogService.logErrorMessage("DonationService::saveDonation", String.valueOf(newDonation.getQuantity()) + newDonation.getUnit());
+            logService.logErrorMessage("DonationService::saveDonation", String.valueOf(newDonation.getQuantity()) + newDonation.getUnit());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -87,7 +90,7 @@ public class DonationController {
 
         if( newDonor == null )
         {
-            LogService.logErrorMessage("DonationService::saveDonor", newDonor.getEmail() );
+            logService.logErrorMessage("DonationService::saveDonor", newDonor.getEmail() );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -99,10 +102,16 @@ public class DonationController {
 
         if( donationService.saveDonation(donation) == null )
         {
-            LogService.logErrorMessage("DonationService::saveDonation", donation.getName());
+            logService.logErrorMessage("DonationService::saveDonation", donation.getName());
             throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @GetMapping("/get-donors")
+    public List<Donor> getDonors(){
+
+        return donationService.getDonors();
     }
 }

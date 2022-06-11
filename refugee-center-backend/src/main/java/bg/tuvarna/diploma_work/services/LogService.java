@@ -17,58 +17,24 @@ public class LogService {
     private static final String informationMessage  = "INFORMATION {MESSAGE}";
 
     @Autowired
-    private static LogRepository logRepository;
+    private LogRepository logRepository;
 
     @Autowired
-    private static UserRepository userRepository;
+    private UserRepository userRepository;
 
-    public static void logErrorMessage(String functionName, String context ){
+    public void logErrorMessage(String functionName, String context ){
 
         Log log = generateErrorLog( functionName, context );
         logRepository.save(log);
     }
 
-    public static void logErrorMessage(String functionName, Long context ){
+    public void logErrorMessage(String functionName, Long context ){
 
         Log log = generateErrorLog( functionName, String.valueOf(context) );
         logRepository.save(log);
     }
 
-    public static void logErrorMessage(String functionName, String context, long currentUserID ){
-
-        Log log = generateErrorLog( functionName, context );
-        log.setUser(userRepository.getById(currentUserID));
-        logRepository.save(log);
-    }
-
-    public static void logWarningMessage( String functionName, String message ){
-
-        Log log = generateWarningLog( functionName, message );
-        logRepository.save(log);
-    }
-
-
-    public static void logWarningMessage( String functionName, String message, long currentUserID ){
-
-        Log log = generateWarningLog( functionName, message );
-        log.setUser(userRepository.getById(currentUserID));
-        logRepository.save(log);
-    }
-
-    public static void logInformationMessage( String message ){
-
-        Log log = generateInformationLog( message );
-        logRepository.save(log);
-    }
-
-
-    public static void logInformationMessage( String message, long currentUserID ){
-        Log log = generateInformationLog( message );
-        log.setUser( userRepository.getById( currentUserID ));
-        logRepository.save(log);
-    }
-
-    private static Log generateErrorLog(String functionName, String context) {
+    private Log generateErrorLog(String functionName, String context) {
 
         Log log = new Log();
         log.setLogType(LogType.ERROR);
@@ -83,7 +49,7 @@ public class LogService {
         return log;
     }
 
-    private static Log generateWarningLog(String functionName, String message ){
+    private Log generateWarningLog(String functionName, String message ){
 
         Log log = new Log();
         log.setLogType(LogType.WARNING);
@@ -98,7 +64,7 @@ public class LogService {
         return log;
     }
 
-    private static Log generateInformationLog(String message) {
+    private Log generateInformationLog(String message) {
 
         Log log = new Log();
         log.setLogType(LogType.ERROR);

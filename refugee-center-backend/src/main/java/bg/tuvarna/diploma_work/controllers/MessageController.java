@@ -2,9 +2,7 @@ package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.Message;
-import bg.tuvarna.diploma_work.models.User;
-import bg.tuvarna.diploma_work.models.UserMessage;
+import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.MailReceiver;
 import bg.tuvarna.diploma_work.storages.MessageData;
@@ -14,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +32,12 @@ public class MessageController {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private LogService logService;
+
+    @Autowired
+    private QuestionService questionService;
 
     @GetMapping("/get-send-messages/{id}")
     public List<UserMessage> getSendMessages(@PathVariable long id){
@@ -102,7 +107,7 @@ public class MessageController {
         User sender = userService.getUser(senderId);
         if( sender == null )
         {
-            LogService.logErrorMessage("UserService::getUser", senderId );
+            logService.logErrorMessage("UserService::getUser", senderId );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -110,7 +115,7 @@ public class MessageController {
         Message savedMessage = messageService.saveMessage(messageData.getMessage());
         if( savedMessage == null )
         {
-            LogService.logErrorMessage("MessageService::saveMessage", senderId );
+            logService.logErrorMessage("MessageService::saveMessage", senderId );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -118,7 +123,7 @@ public class MessageController {
 
             if( messageService.sendMessage(new UserMessage(savedMessage, receiver)) == null )
             {
-                LogService.logErrorMessage("MessageService::sendMessage", senderId );
+                logService.logErrorMessage("MessageService::sendMessage", senderId );
                 throw new InternalErrorResponseStatusException();
             }
 
@@ -134,5 +139,20 @@ public class MessageController {
     public void setAsSeen(@PathVariable long id){
 
         messageService.setAsSeen(id);
+    }
+
+    @PostMapping("/send-question")
+    public ResponseEntity<Void> sendQuestion(@RequestBody Question question) {
+
+        question.setId(0L);
+        question.setDateReceived(LocalDate.now());
+        question.setAnswered(false);
+
+        if( questionService.save( question ) == null ){
+            logService.logErrorMessage("QuestionService::save", question.getId() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -2,7 +2,6 @@ package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.Facility;
 import bg.tuvarna.diploma_work.models.Group;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.models.UserGroup;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:3000"})
@@ -24,10 +22,13 @@ import java.util.List;
 public class GroupController {
 
     @Autowired
-    GroupService groupService;
+    private GroupService groupService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
+
+    @Autowired
+    private LogService logService;
 
     @PostMapping("/create-group")
     public ResponseEntity<Void> createGroup(@RequestBody Group group){
@@ -47,7 +48,7 @@ public class GroupController {
 
         if( groupService.createGroup(group) == null )
         {
-            LogService.logErrorMessage("GroupService::createGroup", String.valueOf(group.getEmail())  );
+            logService.logErrorMessage("GroupService::createGroup", String.valueOf(group.getEmail())  );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -74,21 +75,21 @@ public class GroupController {
         User currentUser = userService.getUser(userGroup.getUser().getId());
         if( currentUser == null )
         {
-            LogService.logErrorMessage("UserService::getUser",  String.valueOf(userGroup.getUser().getId()) );
+            logService.logErrorMessage("UserService::getUser",  String.valueOf(userGroup.getUser().getId()) );
             throw new InternalErrorResponseStatusException();
         }
 
         Group currentGroup = groupService.getGroup(userGroup.getGroup().getId());
         if( currentGroup == null )
         {
-            LogService.logErrorMessage("GroupService::getGroup", String.valueOf(userGroup.getGroup().getId())  );
+            logService.logErrorMessage("GroupService::getGroup", String.valueOf(userGroup.getGroup().getId())  );
             throw new InternalErrorResponseStatusException();
         }
 
         UserGroup newUserGroup = new UserGroup(currentUser, currentGroup);
         if( groupService.addUserGroup(newUserGroup) == null )
         {
-            LogService.logErrorMessage("GroupService::addUserGroup", String.valueOf(userGroup.getGroup().getId())  );
+            logService.logErrorMessage("GroupService::addUserGroup", String.valueOf(userGroup.getGroup().getId())  );
             throw new InternalErrorResponseStatusException();
         }
 
@@ -109,7 +110,7 @@ public class GroupController {
 
         if( !groupService.deleteGroup(id) )
         {
-            LogService.logErrorMessage("GroupService::deleteGroup", id );
+            logService.logErrorMessage("GroupService::deleteGroup", id );
             throw new InternalErrorResponseStatusException();
         }
 

@@ -14,7 +14,7 @@ public class AccountStatusService {
         @Autowired
         private AccountStatusRepository accountStatusRepository;
 
-        public AccountStatus createAccountStatus(AccountStatusType accountStatusType){
+        public AccountStatus saveAccountStatus(AccountStatusType accountStatusType){
 
                 AccountStatus accountStatus = new AccountStatus();
                 accountStatus.setCreatedOn(LocalDate.now());

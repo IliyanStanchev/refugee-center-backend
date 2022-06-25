@@ -27,8 +27,17 @@ public class StockRequest implements Serializable {
 
     LocalDateTime dateCreated;
 
+    String employeeComment;
 
     public StockRequest() {
+    }
+
+    public String getEmployeeComment() {
+        return employeeComment;
+    }
+
+    public void setEmployeeComment(String employeeComment) {
+        this.employeeComment = employeeComment;
     }
 
     public LocalDateTime getDateCreated() {

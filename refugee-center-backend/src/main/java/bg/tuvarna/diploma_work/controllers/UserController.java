@@ -4,12 +4,13 @@ import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
+import bg.tuvarna.diploma_work.exceptions.UnauthorizedUserResponseStatusException;
 import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.AccountData;
 import bg.tuvarna.diploma_work.storages.RefugeeRegistrationData;
-import bg.tuvarna.diploma_work.utils.CharSequenceGenerator;
+import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,8 +54,14 @@ public class UserController {
     @Autowired
     private LogService logService;
 
+    @Autowired
+    private UserSessionService userSessionService;
+
     @PostMapping("/authenticate-user")
-    public ResponseEntity<User> authenticateUser(@RequestBody User user) {
+    @Transactional
+    public ResponseEntity<UserSession> authenticateUser(@RequestBody User user) {
+
+        user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
 
         User currentUser = userService.authenticateUser(user);
         if( currentUser == null )
@@ -70,7 +79,30 @@ public class UserController {
 
         userService.updateUser(currentUser);
 
-        return new ResponseEntity<User>( currentUser, HttpStatus.OK );
+        final String authenticationToken = CharSequenceGenerator.generateAuthenticationCode();
+        UserSession userSession = new UserSession();
+        userSession.setUser(currentUser);
+        userSession.setCreationDate(LocalDateTime.now());
+        userSession.setExpirationDate(LocalDateTime.now().plusHours(1));
+        userSession.setActiveSession(true);
+
+        BCryptPasswordEncoderExtender bCryptPasswordEncoderExtender = new BCryptPasswordEncoderExtender();
+        userSession.setAuthorizationToken(bCryptPasswordEncoderExtender.encode(authenticationToken));
+
+        userSessionService.closeSessions(currentUser.getId());
+
+        userSession = userSessionService.saveUserSession(userSession);
+
+        if( userSession == null ) {
+            logService.logErrorMessage("UserSessionService::changePassword", currentUser.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        UserSession currentUserSession = new UserSession();
+        currentUserSession.setUser(currentUser);
+        currentUserSession.setAuthorizationToken(Base64.getEncoder().encodeToString(authenticationToken.getBytes()));
+
+        return new ResponseEntity<UserSession>( currentUserSession, HttpStatus.OK );
     }
 
     @PostMapping("/forgot-password")
@@ -107,7 +139,7 @@ public class UserController {
     }
 
     @PostMapping("/create-employee")
-    public ResponseEntity<Void> createRefugee(@RequestBody User user) {
+    public ResponseEntity<Void> createEmployee(@RequestBody User user) {
 
         user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
 
@@ -299,5 +331,44 @@ public class UserController {
 
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
-    
+
+    @PostMapping("/verify-user")
+    public ResponseEntity<User> verifyUser(@RequestBody UserSession userSession) {
+
+        if( userSession.getId() == null || userSession.getAuthorizationToken() == null ){
+            throw new UnauthorizedUserResponseStatusException();
+        }
+
+        long    id                  = userSession.getId();
+        String  authorizationToken  = userSession.getAuthorizationToken();
+
+        userSession = userSessionService.getActiveUserSession(id);
+        if( userSession == null ) {
+            throw new UnauthorizedUserResponseStatusException();
+        }
+
+        String decodedToken;
+        try{
+            decodedToken = new String(java.util.Base64.getDecoder().decode(authorizationToken));
+        }
+        catch( Exception e ){
+            throw new UnauthorizedUserResponseStatusException();
+        }
+
+        BCryptPasswordEncoderExtender bCryptPasswordEncoderExtender = new BCryptPasswordEncoderExtender();
+        if( !bCryptPasswordEncoderExtender.matches(decodedToken, userSession.getAuthorizationToken()) ) {
+            throw new UnauthorizedUserResponseStatusException();
+        }
+
+        if( userSession.getExpirationDate().isBefore(LocalDateTime.now()) ) {
+            throw new UnauthorizedUserResponseStatusException();
+        }
+
+        if( userSession.getExpirationDate().isBefore(LocalDateTime.now().plusMinutes(10)) ) {
+            userSession.setExpirationDate(LocalDateTime.now().plusHours(1));
+            userSessionService.saveUserSession(userSession);
+        }
+
+        return new ResponseEntity<User>(userSession.getUser(), HttpStatus.OK);
+    }
 }

@@ -38,21 +38,17 @@ public class DonationAbsorptionScheduler {
             List<DonationAbsorption> absorptions = donationAbsorptionService.getAbsorptions( donation.getId() );
 
             double absorbed = 0;
-            for( DonationAbsorption absorption : absorptions ) {
-
+            for( DonationAbsorption absorption : absorptions )
                 absorbed += absorption.getAbsorption();
-            }
 
             final double donationQuantity = donation.getQuantity();
             final double remaining = donationQuantity - absorbed;
             final int daysTillOutOfStock = (int) Math.ceil( remaining / absorbed );
 
             if( remaining <= 0 ) {
-
                 messageService.notifyDonationOutOfStock(donation);
 
             }else if ( daysTillOutOfStock <= DAYS_TILL_OUT_OF_STOCK_TO_NOTIFY ) {
-
                 messageService.notifyDonationOutOfStock( donation, daysTillOutOfStock);
             }
 

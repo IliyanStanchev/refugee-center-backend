@@ -3,15 +3,13 @@ package bg.tuvarna.diploma_work.controllers;
 import bg.tuvarna.diploma_work.enumerables.RequestStatus;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.LocationChangeRequest;
-import bg.tuvarna.diploma_work.models.MedicalHelpRequest;
-import bg.tuvarna.diploma_work.models.Refugee;
-import bg.tuvarna.diploma_work.models.StockRequest;
+import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.services.*;
 import com.sun.activation.registries.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -35,6 +33,9 @@ public class RequestController {
 
     @Autowired
     private LogService logService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/request-stocks")
     public ResponseEntity<Void> requestStocks(@RequestBody StockRequest stockRequest ) {
@@ -121,21 +122,71 @@ public class RequestController {
     @GetMapping("/get-stock-requests/{userId}")
     public List<StockRequest> getStockRequests(@PathVariable("userId") Long userId ) {
 
-        return requestService.getStockRequests(userId);
+        User user = userService.getUser(userId);
+        if( user == null )
+        {
+            logService.logErrorMessage("UserService::getUser",  userId );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        switch ( user.getRole().getRoleType() ) {
+            case Refugee:
+                return requestService.getStockRequests(userId);
+
+            case Administrator:
+            case Moderator:
+                return requestService.getPendingStockRequests(userId);
+
+            default:
+                throw new CustomResponseStatusException("You are not allowed to perform this action");
+        }
     }
 
     @GetMapping("/get-location-change-requests/{userId}")
     public List<LocationChangeRequest> getLocationChangeRequests(@PathVariable("userId") Long userId ) {
 
-        List<LocationChangeRequest> list = requestService.getLocationChangeRequests(userId);
+        User user = userService.getUser(userId);
+        if( user == null )
+        {
+            logService.logErrorMessage("UserService::getUser",  userId );
+            throw new InternalErrorResponseStatusException();
+        }
 
-        return list;
+        switch ( user.getRole().getRoleType() ) {
+            case Refugee:
+                return requestService.getLocationChangeRequests(userId);
+
+            case Administrator:
+            case Moderator:
+                return requestService.getPendingLocationChangeRequests(userId);
+
+            default:
+                throw new CustomResponseStatusException("You are not allowed to perform this action");
+        }
     }
 
     @GetMapping("/get-medical-help-requests/{userId}")
     public List<MedicalHelpRequest> getMedicalHelpRequests(@PathVariable("userId") Long userId ) {
 
-        return requestService.getMedicalHelpRequests(userId);
+        User user = userService.getUser(userId);
+        if( user == null )
+        {
+            logService.logErrorMessage("UserService::getUser",  userId );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        switch ( user.getRole().getRoleType() ) {
+            case Refugee:
+                return requestService.getMedicalHelpRequests(userId);
+
+            case Administrator:
+            case Moderator:
+                return requestService.getRefugeesMedicalHelpRequests(userId);
+
+            default:
+                throw new CustomResponseStatusException("You are not allowed to perform this action");
+        }
+
     }
 
     @PostMapping("/decline-stock-requests")
@@ -181,6 +232,78 @@ public class RequestController {
                 logService.logErrorMessage("RequestService::save",  locationChangeRequest.toString() );
                 throw new InternalErrorResponseStatusException();
             }
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/decline-stock-request")
+    public ResponseEntity<Void> declineStockRequest(@RequestBody StockRequest stockRequest ) {
+
+        if( stockRequest.getRequestStatus() != RequestStatus.Pending ){
+            throw new CustomResponseStatusException("You can only decline pending requests");
+        }
+
+        stockRequest.setRequestStatus(RequestStatus.Declined);
+        if( requestService.save(stockRequest) == null){
+            logService.logErrorMessage("RequestService::save",  stockRequest.toString() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/decline-location-change-request")
+    public ResponseEntity<Void> declineLocationChangeRequest(@RequestBody LocationChangeRequest locationChangeRequest ) {
+
+        if( locationChangeRequest.getRequestStatus() != RequestStatus.Pending ){
+            throw new CustomResponseStatusException("You can only decline pending requests");
+        }
+
+        locationChangeRequest.setRequestStatus(RequestStatus.Declined);
+        if( requestService.save(locationChangeRequest) == null){
+            logService.logErrorMessage("RequestService::save",  locationChangeRequest.toString() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/approve-stock-request")
+    public ResponseEntity<Void> approveStockRequest(@RequestBody StockRequest stockRequest ) {
+
+        if( stockRequest.getRequestStatus() != RequestStatus.Pending ){
+            throw new CustomResponseStatusException("You can only approve pending requests");
+        }
+
+        stockRequest.setRequestStatus(RequestStatus.Approved);
+        if( requestService.save(stockRequest) == null){
+            logService.logErrorMessage("RequestService::save",  stockRequest.toString() );
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/approve-location-change-request")
+    @Transactional
+    public ResponseEntity<Void> approveLocationChangeRequest(@RequestBody LocationChangeRequest locationChangeRequest ) {
+
+        if (locationChangeRequest.getRequestStatus() != RequestStatus.Pending) {
+            throw new CustomResponseStatusException("You can only approve pending requests");
+        }
+
+        Refugee refugee = locationChangeRequest.getRefugee();
+        Facility facility = locationChangeRequest.getShelter();
+
+        facility.setCurrentCapacity(facility.getCurrentCapacity() + 1);
+
+        refugeeService.addRefugeeToShelter(facility.getId(), refugee.getId() );
+
+        locationChangeRequest.setRequestStatus(RequestStatus.Approved);
+        if (requestService.save(locationChangeRequest) == null) {
+            logService.logErrorMessage("RequestService::save", locationChangeRequest.toString());
+            throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<>(HttpStatus.OK);

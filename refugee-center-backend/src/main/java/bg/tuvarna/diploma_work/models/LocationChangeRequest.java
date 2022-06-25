@@ -29,7 +29,17 @@ public class LocationChangeRequest implements Serializable {
 
     LocalDateTime dateCreated;
 
+    String employeeComment;
+
     public LocationChangeRequest() {
+    }
+
+    public String getEmployeeComment() {
+        return employeeComment;
+    }
+
+    public void setEmployeeComment(String employeeComment) {
+        this.employeeComment = employeeComment;
     }
 
     public LocalDateTime getDateCreated() {

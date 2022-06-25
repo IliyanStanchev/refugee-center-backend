@@ -60,6 +60,6 @@ public class MedicalHelpRequest implements Serializable {
 
     public RequestStatus getRequestStatus(){
 
-        return RequestStatus.Accepted;
+        return RequestStatus.Approved;
     }
 }

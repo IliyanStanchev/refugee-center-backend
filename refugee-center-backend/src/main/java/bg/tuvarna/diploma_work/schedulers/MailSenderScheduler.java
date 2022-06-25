@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 public class MailSenderScheduler {
 
+
     @Autowired
     MailService mailService;
 
@@ -29,6 +30,7 @@ public class MailSenderScheduler {
             if( !mailService.sendEmail(mailMessage) )
             {
                 mailMessage.setThreadId(0L);
+                mailMessage.setUnsuccessfulAttempts((short) (mailMessage.getUnsuccessfulAttempts() + 1));
                 mailService.updateMailMessage( mailMessage );
                 continue;
             }

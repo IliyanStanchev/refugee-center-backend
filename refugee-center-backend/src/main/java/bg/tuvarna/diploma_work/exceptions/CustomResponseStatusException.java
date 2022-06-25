@@ -5,7 +5,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class CustomResponseStatusException extends ResponseStatusException {
 
-    final static int HTTP_STATUS_CUSTOM_STATUS_CODE = 512;
+    final static int HTTP_STATUS_CUSTOM_STATUS_CODE = 433;
 
     public CustomResponseStatusException(String reason) {
         super(  HTTP_STATUS_CUSTOM_STATUS_CODE

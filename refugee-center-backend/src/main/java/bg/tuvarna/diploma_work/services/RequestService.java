@@ -78,4 +78,19 @@ public class RequestService {
 
         return null;
     }
+
+    public List<StockRequest> getPendingStockRequests(Long userId) {
+
+        return stockRequestRepository.getPendingStockRequests(userId);
+    }
+
+    public List<LocationChangeRequest> getPendingLocationChangeRequests(Long userId) {
+
+        return locationChangeRequestRepository.getPendingLocationChangeRequests(userId);
+    }
+
+    public List<MedicalHelpRequest> getRefugeesMedicalHelpRequests(Long userId) {
+
+            return medicalHelpRequestRepository.getRefugeesMedicalHelpRequests(userId);
+    }
 }

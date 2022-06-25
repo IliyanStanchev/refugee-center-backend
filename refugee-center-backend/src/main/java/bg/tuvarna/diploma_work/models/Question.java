@@ -1,5 +1,7 @@
 package bg.tuvarna.diploma_work.models;
 
+import bg.tuvarna.diploma_work.enumerables.QuestionState;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -21,18 +23,28 @@ public class Question implements Serializable {
 
     private LocalDate dateReceived;
 
-    private boolean answered;
+    private QuestionState questionState;
 
+    private String answer;
 
     public Question() {
     }
 
-    public boolean isAnswered() {
-        return answered;
+    public String getAnswer() {
+        return answer;
     }
 
-    public void setAnswered(boolean answered) {
-        this.answered = answered;
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public QuestionState getQuestionState() {
+        return questionState;
+    }
+
+
+    public void setQuestionState( QuestionState questionState) {
+        this.questionState = questionState;
     }
 
     public LocalDate getDateReceived() {
@@ -73,8 +85,5 @@ public class Question implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public void setIsAnswered(boolean b) {
     }
 }

@@ -24,9 +24,20 @@ public class MailMessage implements Serializable {
 
     private long threadId;
 
+    private short unsuccessfulAttempts;
+
     public MailMessage(){
         id = 0L;
+        unsuccessfulAttempts = 0;
 
+    }
+
+    public short getUnsuccessfulAttempts() {
+        return unsuccessfulAttempts;
+    }
+
+    public void setUnsuccessfulAttempts(short unsuccessfulAttempts) {
+        this.unsuccessfulAttempts = unsuccessfulAttempts;
     }
 
     public Long getId() {

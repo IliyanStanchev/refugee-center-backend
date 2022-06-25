@@ -14,4 +14,7 @@ public interface LocationChangeRequestRepository extends JpaRepository<LocationC
 
     @Query("SELECT l FROM LocationChangeRequest l WHERE l.refugee.user.id = ?1 ORDER BY l.requestStatus, l.dateCreated DESC")
     List<LocationChangeRequest> getLocationChangeRequests(Long userId);
+
+    @Query("SELECT l FROM LocationChangeRequest l WHERE l.refugee.facility.responsibleUser.id = ?1 AND l.requestStatus = 0 ORDER BY l.dateCreated DESC")
+    List<LocationChangeRequest> getPendingLocationChangeRequests(Long userId);
 }

@@ -2,6 +2,7 @@ package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.helpers.EmailTemplates;
 import bg.tuvarna.diploma_work.models.MailMessage;
+import bg.tuvarna.diploma_work.models.Question;
 import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.repositories.MailMessageRepository;
@@ -35,24 +36,17 @@ public class MailService {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
         try {
-
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-
             mimeMessageHelper.setFrom(new InternetAddress(message.getSender()));
             mimeMessageHelper.setTo(message.getReceiver());
-
             mimeMessageHelper.setSubject(message.getSubject());
             mimeMessageHelper.setText(message.getContent(),true);
 
             javaMailSender.send(mimeMessageHelper.getMimeMessage());
-
-        }
-        catch (MessagingException e) {
-            logService.logErrorMessage("sendEmail", message.toString());
-            e.printStackTrace();
+        } catch (Exception e) {
+            logService.logErrorMessage("sendEmail", message.toString() + " " + e.getMessage());
             return false;
         }
-
         return true;
     }
 
@@ -159,6 +153,27 @@ public class MailService {
         return true;
     }
 
+    public boolean sendQuestionAnswer(Question question) {
+
+        MailMessage mailMessage = new MailMessage();
+
+        mailMessage.setSender(environment.getProperty("spring.mail.username"));
+        mailMessage.setReceiver(question.getEmail());
+
+        mailMessage.setSubject("Question answer");
+
+        final String messageContent = EmailTemplates.getAnswerQuestionTemplate()
+                .replace("{ANSWER}", question.getAnswer())
+                .replace("{NAME}", question.getName());
+
+        mailMessage.setContent(messageContent);
+
+        if( mailMessageRepository.save(mailMessage) == null )
+            return false;
+
+        return true;
+    }
+
     public List<MailMessage> getPendingMails(long threadId) {
 
         return mailMessageRepository.getPendingMails(threadId);
@@ -183,6 +198,5 @@ public class MailService {
 
         mailMessageRepository.deleteMailMessages(threadId);
     }
-
 
 }

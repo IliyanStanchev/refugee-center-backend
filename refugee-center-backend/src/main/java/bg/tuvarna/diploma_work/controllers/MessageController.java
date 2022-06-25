@@ -1,6 +1,7 @@
 package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
+import bg.tuvarna.diploma_work.enumerables.QuestionState;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.services.*;
@@ -139,20 +140,5 @@ public class MessageController {
     public void setAsSeen(@PathVariable long id){
 
         messageService.setAsSeen(id);
-    }
-
-    @PostMapping("/send-question")
-    public ResponseEntity<Void> sendQuestion(@RequestBody Question question) {
-
-        question.setId(0L);
-        question.setDateReceived(LocalDate.now());
-        question.setAnswered(false);
-
-        if( questionService.save( question ) == null ){
-            logService.logErrorMessage("QuestionService::save", question.getId() );
-            throw new InternalErrorResponseStatusException();
-        }
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

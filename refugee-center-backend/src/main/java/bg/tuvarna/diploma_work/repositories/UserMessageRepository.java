@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface UserMessageRepository extends JpaRepository<UserMessage, Long> {
 
-    @Query(value="SELECT DISTINCT ON (um.message_id) um.* FROM users_messages um JOIN messages m ON m.id = um.message_id JOIN users u ON m.sender_id = u.id WHERE u.id = ?1", nativeQuery = true)
+    @Query(value="SELECT DISTINCT ON (um.message_id) um.* FROM users_messages um JOIN messages m ON m.id = um.message_id JOIN users u ON m.sender_id = u.id WHERE u.id = ?1 ORDER BY um.message_id, m.date_received DESC", nativeQuery = true)
     List<UserMessage> getSendMessages(long userId);
 
-    @Query("SELECT u FROM UserMessage u WHERE u.receiver.id = ?1 ORDER BY u.seen, u.message.dateReceived")
+    @Query("SELECT u FROM UserMessage u WHERE u.receiver.id = ?1 ORDER BY u.seen, u.message.dateReceived DESC")
     List<UserMessage> getReceivedMessages(long id);
 
     @Query("SELECT u FROM UserMessage u WHERE u.message.id = ?1")

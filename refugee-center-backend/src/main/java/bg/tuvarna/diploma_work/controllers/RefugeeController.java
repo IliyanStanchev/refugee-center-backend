@@ -7,7 +7,7 @@ import bg.tuvarna.diploma_work.models.Facility;
 import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.services.*;
-import bg.tuvarna.diploma_work.utils.CharSequenceGenerator;
+import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

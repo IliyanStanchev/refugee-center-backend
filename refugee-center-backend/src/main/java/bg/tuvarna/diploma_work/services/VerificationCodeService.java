@@ -1,10 +1,9 @@
 package bg.tuvarna.diploma_work.services;
 
-import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.models.VerificationCode;
 import bg.tuvarna.diploma_work.repositories.VerificationCodeRepository;
 import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
-import bg.tuvarna.diploma_work.utils.CharSequenceGenerator;
+import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

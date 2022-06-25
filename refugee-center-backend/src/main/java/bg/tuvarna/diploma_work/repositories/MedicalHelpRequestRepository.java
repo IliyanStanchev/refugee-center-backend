@@ -10,4 +10,7 @@ public interface MedicalHelpRequestRepository extends JpaRepository<MedicalHelpR
 
     @Query("SELECT m FROM MedicalHelpRequest m WHERE m.refugee.user.id = ?1 ORDER BY m.dateCreated DESC")
     List<MedicalHelpRequest> getMedicalHelpRequests(Long id);
+
+    @Query("SELECT m FROM MedicalHelpRequest m WHERE m.refugee.facility.responsibleUser.id = ?1 ORDER BY m.dateCreated DESC")
+    List<MedicalHelpRequest> getRefugeesMedicalHelpRequests(Long userId);
 }

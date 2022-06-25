@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface MailMessageRepository extends JpaRepository<MailMessage, Long> {
 
-    @Query("SELECT m FROM MailMessage m WHERE m.threadId = ?1")
+    @Query("SELECT m FROM MailMessage m WHERE m.threadId = ?1 ORDER BY m.unsuccessfulAttempts DESC")
     List<MailMessage> getPendingMails(long threadId);
 
     @Modifying
@@ -19,6 +19,6 @@ public interface MailMessageRepository extends JpaRepository<MailMessage, Long> 
     void reserveMailMessages(long threadId);
 
     @Modifying
-    @Query("DELETE FROM MailMessage m WHERE m.threadId = ?1")
+    @Query("DELETE FROM MailMessage m WHERE m.threadId = ?1 OR m.unsuccessfulAttempts > 10")
     void deleteMailMessages(long threadId);
 }

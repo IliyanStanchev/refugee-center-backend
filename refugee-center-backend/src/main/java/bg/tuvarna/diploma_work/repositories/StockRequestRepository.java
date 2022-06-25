@@ -10,4 +10,7 @@ public interface StockRequestRepository extends JpaRepository<StockRequest, Long
 
     @Query("SELECT s FROM StockRequest s WHERE s.refugee.user.id = ?1 ORDER BY s.requestStatus, s.dateCreated DESC")
     List<StockRequest> getStockRequests(Long userId);
+
+    @Query("SELECT s FROM StockRequest s WHERE s.refugee.facility.responsibleUser.id = ?1 AND s.requestStatus = 0 ORDER BY s.dateCreated DESC")
+    List<StockRequest> getPendingStockRequests(Long userId);
 }

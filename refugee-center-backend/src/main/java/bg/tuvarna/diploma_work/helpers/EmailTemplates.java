@@ -15,6 +15,7 @@ public class EmailTemplates {
     public static final String DECLINED_REGISTRATION_TEMPLATE_PATH  = "src/main/resources/templates/declinedRegistrationTemplate.html";
     public static final String NEW_NOTIFICATION_TEMPLATE_PATH       = "src/main/resources/templates/newNotificationTemplate.html";
     public static final String MEDICAL_HELP_REQUEST_TEMPLATE_PATH   = "src/main/resources/templates/medicalHelpRequestTemplate.html";
+    public static final String ANSWER_QUESTION_TEMPLATE_PATH        = "src/main/resources/templates/answerQuestionTemplate.html";
 
     private static String getTemplate(String htmlPath) {
 
@@ -59,4 +60,9 @@ public class EmailTemplates {
     public static String getMedicalHelpRequestTemplate() {
         return getTemplate(MEDICAL_HELP_REQUEST_TEMPLATE_PATH);
     }
+
+    public static String getAnswerQuestionTemplate() {
+        return getTemplate(ANSWER_QUESTION_TEMPLATE_PATH);
+    }
+
 }

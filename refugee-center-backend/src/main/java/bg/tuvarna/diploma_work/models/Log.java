@@ -23,6 +23,7 @@ public class Log implements Serializable {
 
     private LocalDateTime timestamp;
 
+    @Column(length = 100000)
     private String content;
 
     public Log(){

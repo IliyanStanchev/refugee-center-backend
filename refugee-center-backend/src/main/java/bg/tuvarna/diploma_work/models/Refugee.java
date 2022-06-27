@@ -34,7 +34,7 @@ public class Refugee implements Serializable {
 
     private String specialDiet;
 
-    public Refugee(){
+    public Refugee() {
 
     }
 

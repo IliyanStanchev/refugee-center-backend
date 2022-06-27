@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Ref;
-
 @CrossOrigin(origins = {"http://localhost:3000"})
 @RestController
 public class VerificationCodeController {
@@ -44,8 +42,8 @@ public class VerificationCodeController {
 
         Refugee refugee = refugeeService.getRefugeeByUserId(user.getId());
 
-        if( refugee == null ){
-            logService.logErrorMessage("RefugeeService::getRefugeeByUserId",  user.getId() );
+        if (refugee == null) {
+            logService.logErrorMessage("RefugeeService::getRefugeeByUserId", user.getId());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -55,18 +53,18 @@ public class VerificationCodeController {
 
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setUser(refugee.getUser());
-        verificationCode.setCode( code );
+        verificationCode.setCode(code);
 
-        verificationCode = verificationCodeService.saveVerificationCode( verificationCode );
-        if( verificationCode == null ){
-            logService.logErrorMessage("VerificationCodeService::saveVerificationCode",  user.getId() );
+        verificationCode = verificationCodeService.saveVerificationCode(verificationCode);
+        if (verificationCode == null) {
+            logService.logErrorMessage("VerificationCodeService::saveVerificationCode", user.getId());
             throw new InternalErrorResponseStatusException();
         }
 
         final String message = "Your verification code is: " + code + ". Verification codes last for 10 minutes.";
 
-        if( !twilioService.sendMessage( refugee.getPhoneNumber(), message ) ){
-            logService.logErrorMessage("TwilioService::sendMessage",  user.getId() );
+        if (!twilioService.sendMessage(refugee.getPhoneNumber(), message)) {
+            logService.logErrorMessage("TwilioService::sendMessage", user.getId());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -77,22 +75,22 @@ public class VerificationCodeController {
     @Transactional
     public ResponseEntity<Void> verifyVerificationCode(@RequestBody VerificationCode verificationCode) {
 
-        if( !verificationCodeService.verifyVerificationCode(verificationCode) ){
+        if (!verificationCodeService.verifyVerificationCode(verificationCode)) {
             throw new CustomResponseStatusException("Verification code is not valid");
         }
 
-        Refugee refugee = refugeeService.getRefugeeByUserId( verificationCode.getUser().getId() );
+        Refugee refugee = refugeeService.getRefugeeByUserId(verificationCode.getUser().getId());
 
         AccountStatus accountStatus = refugee.getUser().getAccountStatus();
-        accountStatus.setAccountStatusType( AccountStatusType.Verified );
+        accountStatus.setAccountStatusType(AccountStatusType.Verified);
 
         accountStatus = accountStatusService.updateAccountStatus(accountStatus);
-        if( accountStatus == null ){
-            logService.logErrorMessage("AccountStatusService::updateAccountStatus",  verificationCode.getUser().getId() );
+        if (accountStatus == null) {
+            logService.logErrorMessage("AccountStatusService::updateAccountStatus", verificationCode.getUser().getId());
             throw new InternalErrorResponseStatusException();
         }
 
-        verificationCodeService.deleteVerificationCodes( verificationCode.getUser().getId() );
+        verificationCodeService.deleteVerificationCodes(verificationCode.getUser().getId());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Ref;
 import java.util.List;
 
 @Repository
@@ -30,9 +29,18 @@ public interface RefugeeRepository extends JpaRepository<Refugee, Long> {
     List<Refugee> getUsersWithoutShelter();
 
     @Modifying
-    @Query(value="UPDATE REFUGEES SET REMOVED_FROM_FACILITY = FALSE, FACILITY_ID = ?1 WHERE ID = ?2", nativeQuery = true)
+    @Query(value = "UPDATE REFUGEES SET REMOVED_FROM_FACILITY = FALSE, FACILITY_ID = ?1 WHERE ID = ?2", nativeQuery = true)
     void addRefugeeToShelter(Long shelterId, Long refugeeId);
 
     @Query("SELECT r FROM Refugee r WHERE r.phoneNumber = ?1")
     Refugee getRefugeeByPhone(String phoneNumber);
+
+    @Query("SELECT r.user FROM Refugee r WHERE r.facility.responsibleUser.id = ?1 and r.user.accountStatus.accountStatusType > 2")
+    List<User> getRefugeesByResponsibleUser(Long id);
+
+    @Query("SELECT r.user FROM Refugee r WHERE r.facility.responsibleUser.id = ?1 and r.user.accountStatus.accountStatusType = 4 and r.user.email LIKE '%?2%'")
+    List<User> getRefugeesByResponsibleUser(Long id, String email);
+
+    @Query("SELECT r FROM Refugee r WHERE r.phoneNumber = ?1 and r.id != ?2")
+    Refugee checkPhoneExists(String phoneNumber, Long id);
 }

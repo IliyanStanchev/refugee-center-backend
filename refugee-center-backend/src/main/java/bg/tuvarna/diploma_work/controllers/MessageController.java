@@ -1,9 +1,10 @@
 package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
-import bg.tuvarna.diploma_work.enumerables.QuestionState;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
-import bg.tuvarna.diploma_work.models.*;
+import bg.tuvarna.diploma_work.models.Message;
+import bg.tuvarna.diploma_work.models.User;
+import bg.tuvarna.diploma_work.models.UserMessage;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.MailReceiver;
 import bg.tuvarna.diploma_work.storages.MessageData;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,25 +41,25 @@ public class MessageController {
     private QuestionService questionService;
 
     @GetMapping("/get-send-messages/{id}")
-    public List<UserMessage> getSendMessages(@PathVariable long id){
+    public List<UserMessage> getSendMessages(@PathVariable long id) {
 
         return messageService.getSendMessages(id);
     }
 
     @GetMapping("/get-received-messages/{id}")
-    public List<UserMessage> getReceivedMessages(@PathVariable long id){
+    public List<UserMessage> getReceivedMessages(@PathVariable long id) {
 
         return messageService.getReceivedMessages(id);
     }
 
     @GetMapping("get-receivers")
-    public List<MailReceiver> getReceivers(){
+    public List<MailReceiver> getReceivers() {
 
         return messageService.getReceivers();
     }
 
     @GetMapping("/get-message-receivers/{id}")
-    public List<MailReceiver> getMessageReceivers(@PathVariable long id){
+    public List<MailReceiver> getMessageReceivers(@PathVariable long id) {
 
         return messageService.getMessageReceivers(id);
     }
@@ -87,48 +87,45 @@ public class MessageController {
 
         Set<User> receivers = new HashSet<>();
 
-        for( MailReceiver mailReceiver : messageData.getReceivers() ){
+        for (MailReceiver mailReceiver : messageData.getReceivers()) {
 
-            if( mailReceiver.getIsUser() == true ) {
+            if (mailReceiver.getIsUser() == true) {
                 receivers.add(mailReceiver.getUser());
                 continue;
             }
 
             List<User> groupUsers = groupService.getGroupUsers(mailReceiver.getGroup().getId());
-            for( User user : groupUsers )
-                receivers.add( user );
+            for (User user : groupUsers)
+                receivers.add(user);
 
         }
 
-        if( receivers.size() < 0 )
+        if (receivers.size() < 0)
             return new ResponseEntity<>(HttpStatus.OK);
 
         final long senderId = messageData.getMessage().getSender().getId();
 
         User sender = userService.getUser(senderId);
-        if( sender == null )
-        {
-            logService.logErrorMessage("UserService::getUser", senderId );
+        if (sender == null) {
+            logService.logErrorMessage("UserService::getUser", senderId);
             throw new InternalErrorResponseStatusException();
         }
 
         messageData.getMessage().setSender(sender);
         Message savedMessage = messageService.saveMessage(messageData.getMessage());
-        if( savedMessage == null )
-        {
-            logService.logErrorMessage("MessageService::saveMessage", senderId );
+        if (savedMessage == null) {
+            logService.logErrorMessage("MessageService::saveMessage", senderId);
             throw new InternalErrorResponseStatusException();
         }
 
-        for( User receiver : receivers ){
+        for (User receiver : receivers) {
 
-            if( messageService.sendMessage(new UserMessage(savedMessage, receiver)) == null )
-            {
-                logService.logErrorMessage("MessageService::sendMessage", senderId );
+            if (messageService.sendMessage(new UserMessage(savedMessage, receiver)) == null) {
+                logService.logErrorMessage("MessageService::sendMessage", senderId);
                 throw new InternalErrorResponseStatusException();
             }
 
-            if( savedMessage.getMessageType() == MessageType.Important )
+            if (savedMessage.getMessageType() == MessageType.Important)
                 mailService.sendNewNotificationEmail(sender);
         }
 
@@ -137,7 +134,7 @@ public class MessageController {
 
     @PutMapping("/set-as-seen/{id}")
     @Transactional
-    public void setAsSeen(@PathVariable long id){
+    public void setAsSeen(@PathVariable long id) {
 
         messageService.setAsSeen(id);
     }

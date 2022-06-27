@@ -16,7 +16,7 @@ public class TwilioService {
     @Autowired
     private LogService logService;
 
-    public boolean sendMessage( String receiverPhoneNumber, String message ) {
+    public boolean sendMessage(String receiverPhoneNumber, String message) {
 
         final String ACCOUNT_SID = environment.getProperty("spring.twilio.account.sid");
         final String AUTH_TOKEN = environment.getProperty("spring.twilio.auth.token");
@@ -28,11 +28,10 @@ public class TwilioService {
             Message.creator(
                     new PhoneNumber(receiverPhoneNumber),
                     new PhoneNumber(TWILIO_NUMBER),
-                    message ).create();
-        }
-        catch ( Exception e ) {
+                    message).create();
+        } catch (Exception e) {
 
-            logService.logErrorMessage( "TwilioService::sendMessage", "Error sending message to " + receiverPhoneNumber + ": " + e.getMessage() );
+            logService.logErrorMessage("TwilioService::sendMessage", "Error sending message to " + receiverPhoneNumber + ": " + e.getMessage());
             return false;
         }
 

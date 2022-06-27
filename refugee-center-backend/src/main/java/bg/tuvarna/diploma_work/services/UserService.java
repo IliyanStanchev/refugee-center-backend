@@ -26,32 +26,32 @@ public class UserService {
 
     public List<User> getAll() {
 
-        return  (List<User>) userRepository.getUsersByRole( RoleType.Refugee);
+        return userRepository.getAllUsers();
     }
 
-    public User getUser(long id ) {
-        Optional<User> user = userRepository.findById( id );
+    public User getUser(long id) {
+        Optional<User> user = userRepository.findById(id);
 
         return user.isPresent() ? user.get() : null;
     }
 
-    public User createOrUpdateUser( User modifiedUser, RoleType roleType ) {
+    public User createOrUpdateUser(User modifiedUser, RoleType roleType) {
 
         BCryptPasswordEncoderExtender bCryptPasswordEncoder = new BCryptPasswordEncoderExtender();
-        modifiedUser.setPassword( bCryptPasswordEncoder.encode( modifiedUser.getPassword() ));
+        modifiedUser.setPassword(bCryptPasswordEncoder.encode(modifiedUser.getPassword()));
 
-        if( modifiedUser.getId() == null )
+        if (modifiedUser.getId() == null)
             modifiedUser.setId(0L);
 
-        Optional<User> user = userRepository.findById( modifiedUser.getId() );
-        return user.isPresent() ? updateUser( modifiedUser, user.get() ) : saveUser( modifiedUser, roleType );
+        Optional<User> user = userRepository.findById(modifiedUser.getId());
+        return user.isPresent() ? updateUser(modifiedUser, user.get()) : saveUser(modifiedUser, roleType);
 
     }
 
-    public void deleteUser( long id ) {
+    public void deleteUser(long id) {
         Optional<User> user = userRepository.findById(id);
 
-        if ( user.isPresent() )
+        if (user.isPresent())
             userRepository.deleteById(id);
     }
 
@@ -59,21 +59,21 @@ public class UserService {
         return userRepository.getUserByEmail(email);
     }
 
-    private User updateUser( User newBuffer, User oldBuffer ){
+    private User updateUser(User newBuffer, User oldBuffer) {
 
-        oldBuffer.setNewValues( newBuffer );
-        return userRepository.save( oldBuffer );
+        oldBuffer.setNewValues(newBuffer);
+        return userRepository.save(oldBuffer);
     }
 
-    private User saveUser( User user, RoleType roleType ){
+    private User saveUser(User user, RoleType roleType) {
 
-        Role role = roleRepository.getRole( roleType );
+        Role role = roleRepository.getRole(roleType);
 
-        if( role == null )
+        if (role == null)
             return null;
 
-        user.setRole( role );
-        return userRepository.save( user );
+        user.setRole(role);
+        return userRepository.save(user);
     }
 
     public User authenticateUser(User user) {
@@ -110,6 +110,20 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-    	return userRepository.save(user);
+        return userRepository.save(user);
+    }
+
+    public List<User> getAll(String email) {
+        return userRepository.getAllUsers(email);
+    }
+
+    public User checkEmailExists(User user) {
+
+        return userRepository.checkEmailExists(user.getEmail(), user.getId());
+    }
+
+    public User checkIdentifierExists(User user) {
+
+        return userRepository.checkIdentifierExists(user.getIdentifier(), user.getId());
     }
 }

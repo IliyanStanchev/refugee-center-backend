@@ -11,20 +11,20 @@ import java.time.LocalDate;
 @Service
 public class AccountStatusService {
 
-        @Autowired
-        private AccountStatusRepository accountStatusRepository;
+    @Autowired
+    private AccountStatusRepository accountStatusRepository;
 
-        public AccountStatus saveAccountStatus(AccountStatusType accountStatusType){
+    public AccountStatus saveAccountStatus(AccountStatusType accountStatusType) {
 
-                AccountStatus accountStatus = new AccountStatus();
-                accountStatus.setCreatedOn(LocalDate.now());
-                accountStatus.setLastPasswordChangeDate(LocalDate.now());
-                accountStatus.setAccountStatusType(accountStatusType);
+        AccountStatus accountStatus = new AccountStatus();
+        accountStatus.setCreatedOn(LocalDate.now());
+        accountStatus.setLastPasswordChangeDate(LocalDate.now());
+        accountStatus.setAccountStatusType(accountStatusType);
 
-                return accountStatusRepository.save(accountStatus);
-        }
+        return accountStatusRepository.save(accountStatus);
+    }
 
-        public AccountStatus updateAccountStatus(AccountStatus accountStatus){
-                return accountStatusRepository.save(accountStatus);
-        }
+    public AccountStatus updateAccountStatus(AccountStatus accountStatus) {
+        return accountStatusRepository.save(accountStatus);
+    }
 }

@@ -1,7 +1,5 @@
 package bg.tuvarna.diploma_work.models;
 
-import bg.tuvarna.diploma_work.enumerables.MessageType;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;

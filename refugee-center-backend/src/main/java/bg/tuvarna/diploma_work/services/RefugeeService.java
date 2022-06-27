@@ -17,9 +17,9 @@ public class RefugeeService {
 
     public Refugee getRefugeeByID(Long id) {
 
-        Optional< Refugee > optionalRefugee = refugeeRepository.findById(id);
+        Optional<Refugee> optionalRefugee = refugeeRepository.findById(id);
 
-        if( optionalRefugee.isPresent() )
+        if (optionalRefugee.isPresent())
             return optionalRefugee.get();
 
         return null;
@@ -62,5 +62,20 @@ public class RefugeeService {
     public Refugee getRefugeeByPhone(String phoneNumber) {
 
         return refugeeRepository.getRefugeeByPhone(phoneNumber);
+    }
+
+    public List<User> getRefugeesByResponsibleUser(Long id) {
+
+        return refugeeRepository.getRefugeesByResponsibleUser(id);
+    }
+
+    public List<User> getRefugeesByResponsibleUser(Long id, String email) {
+
+        return refugeeRepository.getRefugeesByResponsibleUser(id, email);
+    }
+
+    public Refugee checkPhoneExists(String phoneNumber, Long id) {
+
+        return refugeeRepository.checkPhoneExists(phoneNumber, id);
     }
 }

@@ -14,9 +14,9 @@ public class QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
 
-    public Question save( Question question ) {
+    public Question save(Question question) {
 
-        return questionRepository.save( question );
+        return questionRepository.save(question);
     }
 
     public List<Question> getQuestions() {
@@ -24,7 +24,7 @@ public class QuestionService {
         return questionRepository.getQuestions();
     }
 
-    public void setAsReserved( long id ) {
+    public void setAsReserved(long id) {
 
         questionRepository.changeQuestionState(id, QuestionState.Reserved);
     }

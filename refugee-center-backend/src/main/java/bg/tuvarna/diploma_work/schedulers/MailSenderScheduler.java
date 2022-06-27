@@ -27,11 +27,10 @@ public class MailSenderScheduler {
 
         for (MailMessage mailMessage : mailMessages) {
 
-            if( !mailService.sendEmail(mailMessage) )
-            {
+            if (!mailService.sendEmail(mailMessage)) {
                 mailMessage.setThreadId(0L);
                 mailMessage.setUnsuccessfulAttempts((short) (mailMessage.getUnsuccessfulAttempts() + 1));
-                mailService.updateMailMessage( mailMessage );
+                mailService.updateMailMessage(mailMessage);
                 continue;
             }
         }

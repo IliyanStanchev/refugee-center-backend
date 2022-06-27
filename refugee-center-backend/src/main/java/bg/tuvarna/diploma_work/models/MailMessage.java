@@ -26,7 +26,7 @@ public class MailMessage implements Serializable {
 
     private short unsuccessfulAttempts;
 
-    public MailMessage(){
+    public MailMessage() {
         id = 0L;
         unsuccessfulAttempts = 0;
 

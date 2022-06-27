@@ -10,18 +10,15 @@ import java.time.LocalDateTime;
 @Table(name = "MEDICAL_HELP_REQUESTS")
 public class MedicalHelpRequest implements Serializable {
 
+    String description;
+    LocalDateTime dateCreated;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "refugee_id")
     private Refugee refugee;
-
-    String description;
-
-    LocalDateTime dateCreated;
 
     public MedicalHelpRequest() {
     }
@@ -58,7 +55,7 @@ public class MedicalHelpRequest implements Serializable {
         this.refugee = refugee;
     }
 
-    public RequestStatus getRequestStatus(){
+    public RequestStatus getRequestStatus() {
 
         return RequestStatus.Approved;
     }

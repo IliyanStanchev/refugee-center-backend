@@ -8,8 +8,8 @@ public class UnauthorizedUserResponseStatusException extends ResponseStatusExcep
     final static int HTTP_STATUS_ERROR_CODE = HttpStatus.UNAUTHORIZED.value();
 
     public UnauthorizedUserResponseStatusException() {
-        super(  HTTP_STATUS_ERROR_CODE
-                ,"Unauthorized access"
-                ,null );
+        super(HTTP_STATUS_ERROR_CODE
+                , "Unauthorized access"
+                , null);
     }
 }

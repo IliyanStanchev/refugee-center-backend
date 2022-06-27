@@ -1,7 +1,5 @@
 package bg.tuvarna.diploma_work.models;
 
-import org.apache.tomcat.jni.Local;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -12,7 +10,7 @@ public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition ="serial")
+    @Column(columnDefinition = "serial")
     private Long id;
 
     private String email;
@@ -110,12 +108,20 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    public void setNewValues( User newBuffer ) {
+    public void setNewValues(User newBuffer) {
         setPassword(newBuffer.getPassword());
         setEmail(newBuffer.getEmail());
         setFirstName(newBuffer.getFirstName());
         setLastName(newBuffer.getLastName());
         setIdentifier(newBuffer.getIdentifier());
+    }
+
+    public String getRoleType() {
+        return role.getRoleType().toString();
+    }
+
+    public String getStatus() {
+        return accountStatus.getAccountStatusType().toString();
     }
 
     public String getName() {

@@ -1,13 +1,10 @@
 package bg.tuvarna.diploma_work.models;
 
 import bg.tuvarna.diploma_work.enumerables.LogType;
-import bg.tuvarna.diploma_work.enumerables.MessageType;
-import org.springframework.lang.UsesSunHttpServer;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -26,7 +23,7 @@ public class Log implements Serializable {
     @Column(length = 100000)
     private String content;
 
-    public Log(){
+    public Log() {
 
     }
 

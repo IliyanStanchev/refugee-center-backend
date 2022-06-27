@@ -36,7 +36,7 @@ public class DonationService {
     public Donation getDonation(Long donationId) {
 
         Optional<Donation> donationOptional = donationRepository.findById(donationId);
-        if( donationOptional.isPresent() )
+        if (donationOptional.isPresent())
             return donationOptional.get();
 
         return null;
@@ -60,5 +60,15 @@ public class DonationService {
     public List<Donor> getDonors() {
 
         return donorRepository.getTopDonors();
+    }
+
+    public void reserveDonations(long threadId) {
+
+        donationRepository.reserveDonations(threadId);
+    }
+
+    public List<Donation> getReservedDonations(long threadId) {
+
+        return donationRepository.getReservedDonations(threadId);
     }
 }

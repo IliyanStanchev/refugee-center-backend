@@ -10,26 +10,20 @@ import java.time.LocalDateTime;
 @Table(name = "LOCATION_CHANGE_REQUESTS")
 public class LocationChangeRequest implements Serializable {
 
+    RequestStatus requestStatus;
+    String description;
+    LocalDateTime dateCreated;
+    String employeeComment;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "refugee_id")
     private Refugee refugee;
-
     @ManyToOne
     @JoinColumn(name = "shelter_id")
     private Facility shelter;
-
-    RequestStatus requestStatus;
-
-    String description;
-
-    LocalDateTime dateCreated;
-
-    String employeeComment;
 
     public LocationChangeRequest() {
     }

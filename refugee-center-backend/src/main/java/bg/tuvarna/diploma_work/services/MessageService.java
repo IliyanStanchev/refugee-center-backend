@@ -55,27 +55,27 @@ public class MessageService {
 
         List<MailReceiver> mailReceivers = new ArrayList<>();
 
-        for( User user : users ){
+        for (User user : users) {
             mailReceivers.add(new MailReceiver(user));
         }
 
-        for( Group group : groups ){
-            mailReceivers.add( new MailReceiver(group));
+        for (Group group : groups) {
+            mailReceivers.add(new MailReceiver(group));
         }
 
-       return mailReceivers;
+        return mailReceivers;
     }
 
     public List<MailReceiver> getMessageReceivers(long messageId) {
 
-       List<UserMessage> userMessages = userMessageRepository.getMessageReceivers(messageId);
-       List<MailReceiver> mailReceivers = new ArrayList<>();
+        List<UserMessage> userMessages = userMessageRepository.getMessageReceivers(messageId);
+        List<MailReceiver> mailReceivers = new ArrayList<>();
 
-       for( UserMessage userMessage : userMessages ){
-           mailReceivers.add(new MailReceiver(userMessage.getReceiver()));
-       }
+        for (UserMessage userMessage : userMessages) {
+            mailReceivers.add(new MailReceiver(userMessage.getReceiver()));
+        }
 
-       return mailReceivers;
+        return mailReceivers;
     }
 
     public Message saveMessage(Message message) {
@@ -126,29 +126,26 @@ public class MessageService {
 
         List<User> users = userRepository.getResponsibleUsers();
 
-        if( users.size() < 0 )
+        if (users.size() < 0)
             return;
 
         User sender = userRepository.getSystemUser();
-        if( sender == null )
-        {
+        if (sender == null) {
             logService.logErrorMessage("UserRepository::getSystemUser", "System user not found");
             return;
         }
         message.setSender(sender);
 
         Message savedMessage = messageRepository.save(message);
-        if( savedMessage == null )
-        {
-            logService.logErrorMessage("MessageRepository::saveMessage", sender.getId() );
+        if (savedMessage == null) {
+            logService.logErrorMessage("MessageRepository::saveMessage", sender.getId());
             return;
         }
 
-        for( User receiver : users ){
+        for (User receiver : users) {
 
-            if( userMessageRepository.save(new UserMessage(savedMessage, receiver)) == null )
-            {
-                logService.logErrorMessage("UserMessageRepository::save", sender.getId() );
+            if (userMessageRepository.save(new UserMessage(savedMessage, receiver)) == null) {
+                logService.logErrorMessage("UserMessageRepository::save", sender.getId());
                 return;
             }
         }

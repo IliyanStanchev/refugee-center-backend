@@ -25,4 +25,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role.roleType = 3")
     User getSystemUser();
 
+    @Query("SELECT u FROM User u WHERE u.role.roleType != 3 and u.role.roleType != 0")
+    List<User> getAllUsers();
+
+    @Query("SELECT u FROM User u WHERE u.role.roleType != 3 and u.role.roleType !=0 and u.email LIKE %?1% ")
+    List<User> getAllUsers(String email);
+
+    @Query("SELECT u FROM User u WHERE u.email = ?1 and u.id != ?2")
+    User checkEmailExists(String email, Long id);
+
+    @Query("SELECT u FROM User u WHERE u.identifier = ?1 and u.id != ?2")
+    User checkIdentifierExists(String identifier, Long id);
 }

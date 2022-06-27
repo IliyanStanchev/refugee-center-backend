@@ -31,8 +31,7 @@ public class DonationController {
     public ResponseEntity<Void> donateMoney(@RequestBody Donation donation) {
 
         Donation moneyDonation = donationService.getMoneyDonation();
-        if (moneyDonation == null)
-        {
+        if (moneyDonation == null) {
             moneyDonation.setDonationType(DonationType.Money);
             moneyDonation.setQuantity(0);
             moneyDonation.setUnit(Unit.USD);
@@ -44,8 +43,7 @@ public class DonationController {
         moneyDonation.setQuantity(moneyDonation.getQuantity() + donation.getQuantity());
         moneyDonation = donationService.saveDonation(moneyDonation);
 
-        if( moneyDonation == null )
-        {
+        if (moneyDonation == null) {
             logService.logErrorMessage("DonationService::saveDonation", String.valueOf(donation.getQuantity()) + donation.getUnit());
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -54,7 +52,7 @@ public class DonationController {
     }
 
     @GetMapping("/get-donations")
-    public List<Donation> getDonations(){
+    public List<Donation> getDonations() {
 
         return donationService.getDonations();
     }
@@ -65,32 +63,31 @@ public class DonationController {
 
         Donation databaseDonation = donationService.getDonation(donationData.getDonation().getId());
 
-        if (databaseDonation != null){
+        if (databaseDonation != null) {
             databaseDonation.setQuantity(donationData.getDonation().getQuantity() + databaseDonation.getQuantity());
         }
 
-        Donation newDonation = databaseDonation == null? donationData.getDonation() : databaseDonation;
+        Donation newDonation = databaseDonation == null ? donationData.getDonation() : databaseDonation;
 
         newDonation = donationService.saveDonation(newDonation);
-        if( newDonation == null ){
+        if (newDonation == null) {
 
             logService.logErrorMessage("DonationService::saveDonation", String.valueOf(newDonation.getQuantity()) + newDonation.getUnit());
             throw new InternalErrorResponseStatusException();
         }
 
-        if( donationData.getDonor().getEmail().isBlank() )
+        if (donationData.getDonor().getEmail().isBlank())
             return new ResponseEntity<Void>(HttpStatus.OK);
 
         Donor donor = donationService.getDonor(donationData.getDonor().getEmail());
 
-        Donor newDonor = donor == null? donationData.getDonor() : donor;
+        Donor newDonor = donor == null ? donationData.getDonor() : donor;
         newDonor.setDateOfDonation(LocalDate.now());
 
         newDonor = donationService.saveDonor(newDonor);
 
-        if( newDonor == null )
-        {
-            logService.logErrorMessage("DonationService::saveDonor", newDonor.getEmail() );
+        if (newDonor == null) {
+            logService.logErrorMessage("DonationService::saveDonor", newDonor.getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -100,8 +97,7 @@ public class DonationController {
     @PostMapping("/update-donation")
     public ResponseEntity<Void> updateDonation(@RequestBody Donation donation) {
 
-        if( donationService.saveDonation(donation) == null )
-        {
+        if (donationService.saveDonation(donation) == null) {
             logService.logErrorMessage("DonationService::saveDonation", donation.getName());
             throw new InternalErrorResponseStatusException();
         }
@@ -110,7 +106,7 @@ public class DonationController {
     }
 
     @GetMapping("/get-donors")
-    public List<Donor> getDonors(){
+    public List<Donor> getDonors() {
 
         return donationService.getDonors();
     }

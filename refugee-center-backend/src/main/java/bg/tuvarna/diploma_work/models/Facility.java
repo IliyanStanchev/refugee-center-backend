@@ -4,7 +4,6 @@ import bg.tuvarna.diploma_work.enumerables.FacilityType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -33,12 +32,12 @@ public class Facility implements Serializable {
     public Facility() {
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public Address getAddress() {
@@ -89,7 +88,7 @@ public class Facility implements Serializable {
         this.currentCapacity = currentCapacity;
     }
 
-    public String getCapacity(){
+    public String getCapacity() {
 
         double capacity = (double) currentCapacity / maxCapacity;
         double percentage = capacity * 100;
@@ -101,7 +100,7 @@ public class Facility implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Facility facility = (Facility) o;
-        return Objects.equals(id, facility.id) && Objects.equals(responsibleUser, facility.responsibleUser) && facilityType == facility.facilityType ;
+        return Objects.equals(id, facility.id) && Objects.equals(responsibleUser, facility.responsibleUser) && facilityType == facility.facilityType;
     }
 
     @Override

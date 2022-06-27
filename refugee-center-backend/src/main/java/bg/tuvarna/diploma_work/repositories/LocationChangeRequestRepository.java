@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface LocationChangeRequestRepository extends JpaRepository<LocationChangeRequest , Long> {
+public interface LocationChangeRequestRepository extends JpaRepository<LocationChangeRequest, Long> {
 
 
     @Query("SELECT l FROM LocationChangeRequest l WHERE l.requestStatus = 0 AND l.refugee.id = ?1")

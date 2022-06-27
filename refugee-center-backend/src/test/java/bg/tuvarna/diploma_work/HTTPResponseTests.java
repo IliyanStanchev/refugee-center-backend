@@ -42,7 +42,7 @@ public class HTTPResponseTests {
     @Test
     public void authenticateUser() throws Exception {
 
-        final String baseUrl = "http://localhost:"+port+"/authenticate-user";
+        final String baseUrl = "http://localhost:" + port + "/authenticate-user";
         URI uri = new URI(baseUrl);
         User user = new User();
         user.setEmail("iliyan.stanchevv@gmail.com");
@@ -59,14 +59,14 @@ public class HTTPResponseTests {
     @Test
     public void verifyVerificationCode() throws Exception {
 
-        final String baseUrl = "http://localhost:"+port+"/verify-verification-code";
+        final String baseUrl = "http://localhost:" + port + "/verify-verification-code";
         URI uri = new URI(baseUrl);
 
         User user = new User();
-        user.setId( 1L );
+        user.setId(1L);
 
         VerificationCode verificationCode = new VerificationCode();
-        verificationCode.setUser( user );
+        verificationCode.setUser(user);
         verificationCode.setCode("Sdadasdas@#!das");
 
         HttpHeaders headers = new HttpHeaders();
@@ -80,7 +80,7 @@ public class HTTPResponseTests {
     @Test
     public void validateEmployeeCreation() throws Exception {
 
-        final String baseUrl = "http://localhost:"+port+"/create-employee";
+        final String baseUrl = "http://localhost:" + port + "/create-employee";
         URI uri = new URI(baseUrl);
 
         User user = new User();
@@ -99,7 +99,7 @@ public class HTTPResponseTests {
     @Test
     public void createEmployee() throws Exception {
 
-        final String baseUrl = "http://localhost:"+port+"/create-employee";
+        final String baseUrl = "http://localhost:" + port + "/create-employee";
         URI uri = new URI(baseUrl);
 
         User user = new User();

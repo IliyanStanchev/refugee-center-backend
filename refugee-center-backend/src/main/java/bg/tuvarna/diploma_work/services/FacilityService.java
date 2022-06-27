@@ -14,7 +14,7 @@ public class FacilityService {
     @Autowired
     private FacilityRepository facilityRepository;
 
-    public List<Facility> getAllShelters(){
+    public List<Facility> getAllShelters() {
         return facilityRepository.getAllShelters();
     }
 
@@ -25,7 +25,7 @@ public class FacilityService {
     public Facility getById(Long id) {
 
         Optional<Facility> optionalFacility = facilityRepository.findById(id);
-        if( optionalFacility.isPresent() )
+        if (optionalFacility.isPresent())
             return optionalFacility.get();
 
         return null;

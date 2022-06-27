@@ -15,9 +15,9 @@ import java.util.Optional;
 @Service
 public class GroupService {
 
-    private static final String ALL_REFUGEES_GROUP_MAIL     = "all.refugees@safe_shelter.com";
-    private static final String ALL_EMPLOYEES_GROUP_MAIL    = "all.employees@safe_shelter.com";
-    private static final String ALL_COMMON_GROUP_MAIL       = "all.common@safe_shelter.com";
+    private static final String ALL_REFUGEES_GROUP_MAIL = "all.refugees@safe_shelter.com";
+    private static final String ALL_EMPLOYEES_GROUP_MAIL = "all.employees@safe_shelter.com";
+    private static final String ALL_COMMON_GROUP_MAIL = "all.common@safe_shelter.com";
 
     @Autowired
     private GroupRepository groupRepository;
@@ -25,72 +25,73 @@ public class GroupService {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
-    public List<Group> getAllGroups(){
+    public List<Group> getAllGroups() {
         return groupRepository.findAll();
     }
 
-    public List<User> getGroupUsers(long id) { return userGroupRepository.getUsersByGroupId(id);
+    public List<User> getGroupUsers(long id) {
+        return userGroupRepository.getUsersByGroupId(id);
     }
 
-    public Group getGroupByEmail( String email ) {
-        return groupRepository.getByEmail( email );
+    public Group getGroupByEmail(String email) {
+        return groupRepository.getByEmail(email);
     }
 
-    public Group getAllRefugeesGroup( ){
+    public Group getAllRefugeesGroup() {
         return getGroupByEmail(ALL_REFUGEES_GROUP_MAIL);
     }
 
-    public Group getAllEmployeesGroup(){
+    public Group getAllEmployeesGroup() {
         return getGroupByEmail(ALL_EMPLOYEES_GROUP_MAIL);
     }
 
-    public Group getAllCommonGroup(){
+    public Group getAllCommonGroup() {
         return getGroupByEmail(ALL_COMMON_GROUP_MAIL);
     }
 
     public boolean addEmployeeToGroups(User savedUser) {
 
-        if( !addToCommonGroup(savedUser) )
+        if (!addToCommonGroup(savedUser))
             return false;
 
         Group employeeGroup = getAllEmployeesGroup();
 
-        if( employeeGroup == null )
+        if (employeeGroup == null)
             return false;
 
         UserGroup userGroup = new UserGroup(savedUser, employeeGroup);
-        if( userGroupRepository.save(userGroup) == null )
+        if (userGroupRepository.save(userGroup) == null)
             return false;
 
         return true;
     }
 
-    public boolean addRefugeeToGroups(User savedUser){
+    public boolean addRefugeeToGroups(User savedUser) {
 
-        if( !addToCommonGroup(savedUser) )
+        if (!addToCommonGroup(savedUser))
             return false;
 
         Group refugeeGroup = getAllRefugeesGroup();
 
-        if( refugeeGroup == null )
+        if (refugeeGroup == null)
             return false;
 
         UserGroup userGroup = new UserGroup(savedUser, refugeeGroup);
-        if( userGroupRepository.save(userGroup) == null )
+        if (userGroupRepository.save(userGroup) == null)
             return false;
 
         return true;
     }
 
-    public boolean addToCommonGroup(User user){
+    public boolean addToCommonGroup(User user) {
 
         Group commonGroup = getAllCommonGroup();
 
-        if( commonGroup == null )
+        if (commonGroup == null)
             return false;
 
         UserGroup userGroup = new UserGroup(user, commonGroup);
-        if( userGroupRepository.save(userGroup) == null )
+        if (userGroupRepository.save(userGroup) == null)
             return false;
 
         return true;
@@ -98,10 +99,10 @@ public class GroupService {
 
     public List<UserGroup> getUsersForAdding(Group group) {
 
-        if( group.getGroupType() == GroupType.Common)
+        if (group.getGroupType() == GroupType.Common)
             return userGroupRepository.getAllUsersForAdding(group.getId());
 
-        if( group.getGroupType() == GroupType.Employees)
+        if (group.getGroupType() == GroupType.Employees)
             return userGroupRepository.getEmployeesForAdding(group.getId());
 
         return userGroupRepository.getRefugeesForAdding(group.getId());
@@ -109,9 +110,9 @@ public class GroupService {
 
     public Group getGroup(Long id) {
 
-        Optional<Group> optionalGroup =  groupRepository.findById(id);
+        Optional<Group> optionalGroup = groupRepository.findById(id);
 
-        if( optionalGroup.isPresent() )
+        if (optionalGroup.isPresent())
             return optionalGroup.get();
 
         return null;
@@ -134,18 +135,18 @@ public class GroupService {
 
     public boolean validateGroupType(Group group) {
 
-        if( group.getGroupType() == GroupType.Common)
+        if (group.getGroupType() == GroupType.Common)
             return true;
 
         long invalidUsersCount = 0;
 
-        if( group.getGroupType() == GroupType.Employees)
+        if (group.getGroupType() == GroupType.Employees)
             invalidUsersCount = userGroupRepository.getRefugeesCount(group.getId());
 
-        if( group.getGroupType() == GroupType.Refugees)
+        if (group.getGroupType() == GroupType.Refugees)
             invalidUsersCount = userGroupRepository.getEmployeesCount(group.getId());
 
-        if( invalidUsersCount > 0 )
+        if (invalidUsersCount > 0)
             return false;
 
         return true;

@@ -18,11 +18,11 @@ public class DonationAbsorptionService {
     @Autowired
     private DonationRepository donationRepository;
 
-    public List<DonationAbsorption> getDonationAbsorptions(Long shelterId){
+    public List<DonationAbsorption> getDonationAbsorptions(Long shelterId) {
         return donationAbsorptionRepository.getDonationAbsorptions(shelterId);
     }
 
-    public List<DonationAbsorption> getAbsorptions(Long donationId){
+    public List<DonationAbsorption> getAbsorptions(Long donationId) {
         return donationAbsorptionRepository.getAbsorptions(donationId);
     }
 

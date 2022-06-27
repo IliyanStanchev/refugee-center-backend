@@ -1,9 +1,9 @@
 package bg.tuvarna.diploma_work.services;
 
+import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import bg.tuvarna.diploma_work.models.VerificationCode;
 import bg.tuvarna.diploma_work.repositories.VerificationCodeRepository;
 import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
-import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class VerificationCodeService {
     public VerificationCode saveVerificationCode(VerificationCode verificationCode) {
 
         BCryptPasswordEncoderExtender passwordEncoder = new BCryptPasswordEncoderExtender();
-        verificationCode.setCode(passwordEncoder.encode( verificationCode.getCode() ));
+        verificationCode.setCode(passwordEncoder.encode(verificationCode.getCode()));
 
         return verificationCodeRepository.save(verificationCode);
     }
@@ -35,14 +35,14 @@ public class VerificationCodeService {
 
     public boolean verifyVerificationCode(VerificationCode verificationCode) {
 
-        VerificationCode baseVerificationCode = verificationCodeRepository.getVerificationCode( verificationCode.getUser().getId() );
+        VerificationCode baseVerificationCode = verificationCodeRepository.getVerificationCode(verificationCode.getUser().getId());
 
-        if( baseVerificationCode == null ) {
+        if (baseVerificationCode == null) {
             return false;
         }
 
         BCryptPasswordEncoderExtender bCryptPasswordEncoderExtender = new BCryptPasswordEncoderExtender();
-        if( !bCryptPasswordEncoderExtender.matches( verificationCode.getCode(), baseVerificationCode.getCode() ) ) {
+        if (!bCryptPasswordEncoderExtender.matches(verificationCode.getCode(), baseVerificationCode.getCode())) {
             return false;
         }
 
@@ -53,10 +53,10 @@ public class VerificationCodeService {
 
         LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(10);
 
-        List< VerificationCode > verificationCodes = verificationCodeRepository.findAll();
+        List<VerificationCode> verificationCodes = verificationCodeRepository.findAll();
 
-        for( VerificationCode verificationCode : verificationCodes ) {
-            if( verificationCode.getDateTime().isBefore( localDateTime ) ) {
+        for (VerificationCode verificationCode : verificationCodes) {
+            if (verificationCode.getDateTime().isBefore(localDateTime)) {
                 verificationCodeRepository.delete(verificationCode);
             }
         }

@@ -1,8 +1,6 @@
 package bg.tuvarna.diploma_work.repositories;
 
-import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.models.Facility;
-import bg.tuvarna.diploma_work.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

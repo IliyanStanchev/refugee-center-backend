@@ -44,14 +44,13 @@ public class FacilityController {
     }
 
     @PostMapping("/save-facility")
-    public ResponseEntity<Void> saveFacility(@RequestBody Facility facility){
+    public ResponseEntity<Void> saveFacility(@RequestBody Facility facility) {
 
         Address address = addressService.saveAddress(facility.getAddress());
         facility.setAddress(address);
 
-        if( facilityService.saveFacility(facility) == null )
-        {
-            logService.logErrorMessage("FacilityService::saveFacility",  facility.getAddress().toString() );
+        if (facilityService.saveFacility(facility) == null) {
+            logService.logErrorMessage("FacilityService::saveFacility", facility.getAddress().toString());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -62,9 +61,8 @@ public class FacilityController {
     public List<Facility> getSheltersForTransfer(@PathVariable("id") Long id) {
 
         Refugee refugee = refugeeService.getRefugeeByUserId(id);
-        if( refugee == null )
-        {
-            logService.logErrorMessage("RefugeeService::getRefugeeByUserId",  id );
+        if (refugee == null) {
+            logService.logErrorMessage("RefugeeService::getRefugeeByUserId", id);
             throw new InternalErrorResponseStatusException();
         }
 

@@ -23,7 +23,7 @@ public class Address implements Serializable {
 
     private String address;
 
-    public Address(){
+    public Address() {
 
     }
 

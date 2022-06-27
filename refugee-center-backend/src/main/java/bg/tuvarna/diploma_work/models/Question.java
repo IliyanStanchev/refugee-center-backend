@@ -43,7 +43,7 @@ public class Question implements Serializable {
     }
 
 
-    public void setQuestionState( QuestionState questionState) {
+    public void setQuestionState(QuestionState questionState) {
         this.questionState = questionState;
     }
 

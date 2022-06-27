@@ -11,17 +11,14 @@ import java.util.Objects;
 @Table(name = "DONATIONS")
 public class Donation implements Serializable {
 
+    long threadId;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
-
     private DonationType donationType;
-
     private String name;
-
     private double quantity;
-
     private Unit unit;
 
     public Donation() {
@@ -32,6 +29,14 @@ public class Donation implements Serializable {
         this.donationType = donationType;
         this.quantity = quantity;
         this.unit = unit;
+    }
+
+    public long getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(long threadId) {
+        this.threadId = threadId;
     }
 
     public String getName() {
@@ -85,6 +90,6 @@ public class Donation implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, donationType, quantity, unit );
+        return Objects.hash(id, donationType, quantity, unit);
     }
 }

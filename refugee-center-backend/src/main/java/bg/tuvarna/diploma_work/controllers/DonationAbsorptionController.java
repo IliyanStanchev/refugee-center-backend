@@ -28,28 +28,26 @@ public class DonationAbsorptionController {
     private LogService logService;
 
     @GetMapping("/get-donation-absorptions/{id}")
-    public List<DonationAbsorption> getDonationAbsorptions(@PathVariable Long id){
+    public List<DonationAbsorption> getDonationAbsorptions(@PathVariable Long id) {
         return donationAbsorptionService.getDonationAbsorptions(id);
     }
 
     @GetMapping("/get-new-shelter-absorptions/{id}")
-    public List<Donation> getNewShelterAbsorptions(@PathVariable Long id){
+    public List<Donation> getNewShelterAbsorptions(@PathVariable Long id) {
         return donationAbsorptionService.getNewShelterAbsorptions(id);
     }
 
     @PostMapping("/save-donation-absorption")
-    public ResponseEntity<Void> saveDonationAbsorption(@RequestBody DonationAbsorption donationAbsorption){
+    public ResponseEntity<Void> saveDonationAbsorption(@RequestBody DonationAbsorption donationAbsorption) {
 
         Facility facility = facilityService.getById(donationAbsorption.getFacility().getId());
-        if( facility == null )
-        {
-            logService.logErrorMessage("FacilityService::getById", donationAbsorption.getFacility().getId() );
+        if (facility == null) {
+            logService.logErrorMessage("FacilityService::getById", donationAbsorption.getFacility().getId());
             throw new InternalErrorResponseStatusException();
         }
 
-        if( donationAbsorptionService.saveDonationAbsorption(donationAbsorption) == null )
-        {
-            logService.logErrorMessage("DonationAbsorptionService::saveDonationAbsorption", donationAbsorption.getId() );
+        if (donationAbsorptionService.saveDonationAbsorption(donationAbsorption) == null) {
+            logService.logErrorMessage("DonationAbsorptionService::saveDonationAbsorption", donationAbsorption.getId());
             throw new InternalErrorResponseStatusException();
         }
 

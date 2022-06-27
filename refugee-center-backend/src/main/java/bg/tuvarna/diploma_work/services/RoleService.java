@@ -16,9 +16,11 @@ public class RoleService {
 
     //Methods
     //-----------------
-    public Role getRole( RoleType roleType ){
-        return roleRepository.getRole( roleType );
+    public Role getRole(RoleType roleType) {
+        return roleRepository.getRole(roleType);
     }
 
-    public Role saveRole( Role role ) { return roleRepository.save(role ); }
+    public Role saveRole(Role role) {
+        return roleRepository.save(role);
+    }
 }

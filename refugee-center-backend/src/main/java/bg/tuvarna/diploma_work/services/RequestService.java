@@ -24,19 +24,19 @@ public class RequestService {
     @Autowired
     private StockRequestRepository stockRequestRepository;
 
-    public MedicalHelpRequest save( MedicalHelpRequest medicalHelpRequest ){
+    public MedicalHelpRequest save(MedicalHelpRequest medicalHelpRequest) {
 
         return medicalHelpRequestRepository.save(medicalHelpRequest);
     }
 
 
-    public LocationChangeRequest save( LocationChangeRequest locationChangeRequest ){
+    public LocationChangeRequest save(LocationChangeRequest locationChangeRequest) {
 
         return locationChangeRequestRepository.save(locationChangeRequest);
     }
 
 
-    public StockRequest save( StockRequest stockRequest ){
+    public StockRequest save(StockRequest stockRequest) {
 
         return stockRequestRepository.save(stockRequest);
     }
@@ -64,7 +64,7 @@ public class RequestService {
     public StockRequest getStockRequest(Long id) {
 
         Optional<StockRequest> stockRequest = stockRequestRepository.findById(id);
-        if( stockRequest.isPresent() )
+        if (stockRequest.isPresent())
             return stockRequest.get();
 
         return null;
@@ -73,7 +73,7 @@ public class RequestService {
     public LocationChangeRequest getLocationChangeRequest(Long id) {
 
         Optional<LocationChangeRequest> locationChangeRequest = locationChangeRequestRepository.findById(id);
-        if( locationChangeRequest.isPresent() )
+        if (locationChangeRequest.isPresent())
             return locationChangeRequest.get();
 
         return null;
@@ -91,6 +91,6 @@ public class RequestService {
 
     public List<MedicalHelpRequest> getRefugeesMedicalHelpRequests(Long userId) {
 
-            return medicalHelpRequestRepository.getRefugeesMedicalHelpRequests(userId);
+        return medicalHelpRequestRepository.getRefugeesMedicalHelpRequests(userId);
     }
 }

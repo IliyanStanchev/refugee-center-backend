@@ -5,12 +5,12 @@ import bg.tuvarna.diploma_work.enumerables.RoleType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.UnauthorizedUserResponseStatusException;
+import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.security.BCryptPasswordEncoderExtender;
 import bg.tuvarna.diploma_work.services.*;
 import bg.tuvarna.diploma_work.storages.AccountData;
 import bg.tuvarna.diploma_work.storages.RefugeeRegistrationData;
-import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -64,13 +65,13 @@ public class UserController {
         user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
 
         User currentUser = userService.authenticateUser(user);
-        if( currentUser == null )
+        if (currentUser == null)
             throw new CustomResponseStatusException("Wrong username or password");
 
-        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Blocked)
+        if (currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Blocked)
             throw new CustomResponseStatusException("Your account has been blocked by administrator");
 
-        if( currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Pending )
+        if (currentUser.getAccountStatus().getAccountStatusType() == AccountStatusType.Pending)
             throw new CustomResponseStatusException("Your account is not confirmed by administrator. Please be patient.");
 
         currentUser.getAccountStatus().setLastLogin(LocalDate.now());
@@ -93,7 +94,7 @@ public class UserController {
 
         userSession = userSessionService.saveUserSession(userSession);
 
-        if( userSession == null ) {
+        if (userSession == null) {
             logService.logErrorMessage("UserSessionService::changePassword", currentUser.getId());
             throw new InternalErrorResponseStatusException();
         }
@@ -102,35 +103,32 @@ public class UserController {
         currentUserSession.setUser(currentUser);
         currentUserSession.setAuthorizationToken(Base64.getEncoder().encodeToString(authenticationToken.getBytes()));
 
-        return new ResponseEntity<UserSession>( currentUserSession, HttpStatus.OK );
+        return new ResponseEntity<UserSession>(currentUserSession, HttpStatus.OK);
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> sendNewPassword(@RequestBody User user) {
 
         User currentUser = userService.getUserByEmail(user.getEmail());
-        if( currentUser == null )
+        if (currentUser == null)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         final String newPassword = CharSequenceGenerator.generatePassword();
 
         User modifiedUser = userService.changePassword(currentUser, newPassword);
 
-        if( modifiedUser == null )
-        {
+        if (modifiedUser == null) {
             logService.logErrorMessage("UserService::changePassword", modifiedUser.getEmail());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         User databaseUser = userService.getUser(modifiedUser.getId());
-        if( databaseUser == null )
-        {
+        if (databaseUser == null) {
             logService.logErrorMessage("CustomerService::getCustomerByUserID", String.valueOf(modifiedUser.getId()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if( !mailService.sendResetPasswordEmail(databaseUser, newPassword) )
-        {
+        if (!mailService.sendResetPasswordEmail(databaseUser, newPassword)) {
             logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -146,8 +144,8 @@ public class UserController {
         validateUser(user);
 
         AccountStatus accountStatus = accountStatusService.saveAccountStatus(AccountStatusType.Verified);
-        if( accountStatus == null ) {
-            logService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail() );
+        if (accountStatus == null) {
+            logService.logErrorMessage("AccountStatusService::createAccountStatus", user.getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -156,22 +154,19 @@ public class UserController {
         final String newPassword = CharSequenceGenerator.generatePassword();
         user.setPassword(newPassword);
 
-        User savedUser = userService.createOrUpdateUser( user, RoleType.Moderator);
+        User savedUser = userService.createOrUpdateUser(user, RoleType.Moderator);
 
-        if( savedUser == null )
-        {
-            logService.logErrorMessage("UserService::createOrUpdateUser", user.getEmail() );
+        if (savedUser == null) {
+            logService.logErrorMessage("UserService::createOrUpdateUser", user.getEmail());
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if( !groupService.addEmployeeToGroups(savedUser))
-        {
-            logService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail() );
+        if (!groupService.addEmployeeToGroups(savedUser)) {
+            logService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail());
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if( !mailService.sendNewUserEmail(savedUser, newPassword) )
-        {
+        if (!mailService.sendNewUserEmail(savedUser, newPassword)) {
             logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -186,8 +181,7 @@ public class UserController {
         Refugee refugee = refugeeRegistrationData.getRefugee();
 
         User employee = userService.getUser(refugeeRegistrationData.getEmployeeId());
-        if( employee == null )
-        {
+        if (employee == null) {
             logService.logErrorMessage("UserService::getUser", String.valueOf(refugeeRegistrationData.getEmployeeId()));
             throw new InternalErrorResponseStatusException();
         }
@@ -198,69 +192,65 @@ public class UserController {
 
         validateUser(refugee.getUser());
 
-        Refugee checkRefugee = refugeeService.getRefugeeByPhone( refugee.getPhoneNumber() );
-        if( checkRefugee != null )
+        Refugee checkRefugee = refugeeService.getRefugeeByPhone(refugee.getPhoneNumber());
+        if (checkRefugee != null)
             throw new CustomResponseStatusException("Refugee with this phone number already exists");
 
         final String newPassword = CharSequenceGenerator.generatePassword();
         refugee.getUser().setPassword(newPassword);
 
         AccountStatus accountStatus = accountStatusService
-                .saveAccountStatus( roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved );
+                .saveAccountStatus(roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved);
 
-        if( accountStatus == null ) {
-            logService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail() );
+        if (accountStatus == null) {
+            logService.logErrorMessage("AccountStatusService::createAccountStatus", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
         refugee.getUser().setAccountStatus(accountStatus);
 
-        User savedUser = userService.createOrUpdateUser( refugee.getUser(), RoleType.Refugee);
+        User savedUser = userService.createOrUpdateUser(refugee.getUser(), RoleType.Refugee);
 
-        if( savedUser == null ) {
-            logService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail() );
+        if (savedUser == null) {
+            logService.logErrorMessage("UserService::createOrUpdateUser", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
         refugee.setUser(savedUser);
 
-       Address savedAddress = addressService.saveAddress(refugee.getAddress());
-        if( savedAddress == null ) {
+        Address savedAddress = addressService.saveAddress(refugee.getAddress());
+        if (savedAddress == null) {
             logService.logErrorMessage("AddressService::createAddress", refugee.getAddress().toString());
             throw new InternalErrorResponseStatusException();
         }
 
         refugee.setAddress(savedAddress);
         refugee.setId(0L);
-        Refugee savedRefugee = refugeeService.saveRefugee( refugee );
+        Refugee savedRefugee = refugeeService.saveRefugee(refugee);
 
-        if( savedRefugee == null ){
-            logService.logErrorMessage("RefugeeService::createRefugee",  refugee.getUser().getEmail() );
+        if (savedRefugee == null) {
+            logService.logErrorMessage("RefugeeService::createRefugee", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
-        if( !groupService.addRefugeeToGroups(refugee.getUser()))
-        {
-            logService.logErrorMessage("GroupService::addRefugeeToGroups",  refugee.getUser().getEmail() );
+        if (!groupService.addRefugeeToGroups(refugee.getUser())) {
+            logService.logErrorMessage("GroupService::addRefugeeToGroups", refugee.getUser().getEmail());
             throw new InternalErrorResponseStatusException();
         }
 
         Facility facility = facilityService.getById(refugee.getFacility().getId());
-        if( facility == null )
-        {
-            logService.logErrorMessage("FacilityService::getById",  refugee.getFacility().getId() );
+        if (facility == null) {
+            logService.logErrorMessage("FacilityService::getById", refugee.getFacility().getId());
             throw new InternalErrorResponseStatusException();
         }
 
         facility.setCurrentCapacity(facility.getCurrentCapacity() + 1);
-        if( facilityService.saveFacility(facility) == null )
-        {
-            logService.logErrorMessage("FacilityService::saveFacility",  refugee.getFacility().getId() );
+        if (facilityService.saveFacility(facility) == null) {
+            logService.logErrorMessage("FacilityService::saveFacility", refugee.getFacility().getId());
             throw new InternalErrorResponseStatusException();
         }
 
-        if( !mailService.sendNewUserEmail(savedUser, newPassword) )
-        {
+        if (!mailService.sendNewUserEmail(savedUser, newPassword)) {
             logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             throw new InternalErrorResponseStatusException();
         }
@@ -278,10 +268,10 @@ public class UserController {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    private void validateUser( User user ){
+    private void validateUser(User user) {
 
         User currentUser = userService.getUserByEmail(user.getEmail());
-        if( currentUser != null )
+        if (currentUser != null)
             throw new CustomResponseStatusException("User with this email already exists");
 
         currentUser = userService.getUserByIdentifier(user.getIdentifier());
@@ -323,8 +313,7 @@ public class UserController {
 
         user.setAccountStatus(accountStatus);
         user.setPassword(encoder.encode(accountData.getNewPassword()));
-        if (userService.updateUser(user) == null)
-        {
+        if (userService.updateUser(user) == null) {
             logService.logErrorMessage("UserService::updateUser", accountData.getId());
             throw new InternalErrorResponseStatusException();
         }
@@ -335,40 +324,137 @@ public class UserController {
     @PostMapping("/verify-user")
     public ResponseEntity<User> verifyUser(@RequestBody UserSession userSession) {
 
-        if( userSession.getId() == null || userSession.getAuthorizationToken() == null ){
+        if (userSession.getId() == null || userSession.getAuthorizationToken() == null) {
             throw new UnauthorizedUserResponseStatusException();
         }
 
-        long    id                  = userSession.getId();
-        String  authorizationToken  = userSession.getAuthorizationToken();
+        long id = userSession.getId();
+        String authorizationToken = userSession.getAuthorizationToken();
 
         userSession = userSessionService.getActiveUserSession(id);
-        if( userSession == null ) {
+        if (userSession == null) {
             throw new UnauthorizedUserResponseStatusException();
         }
 
         String decodedToken;
-        try{
+        try {
             decodedToken = new String(java.util.Base64.getDecoder().decode(authorizationToken));
-        }
-        catch( Exception e ){
+        } catch (Exception e) {
+            userSessionService.closeSessions(id);
             throw new UnauthorizedUserResponseStatusException();
         }
 
         BCryptPasswordEncoderExtender bCryptPasswordEncoderExtender = new BCryptPasswordEncoderExtender();
-        if( !bCryptPasswordEncoderExtender.matches(decodedToken, userSession.getAuthorizationToken()) ) {
+        if (!bCryptPasswordEncoderExtender.matches(decodedToken, userSession.getAuthorizationToken())) {
+            userSessionService.closeSessions(id);
             throw new UnauthorizedUserResponseStatusException();
         }
 
-        if( userSession.getExpirationDate().isBefore(LocalDateTime.now()) ) {
+        if (userSession.getExpirationDate().isBefore(LocalDateTime.now())) {
+            userSessionService.closeSessions(id);
             throw new UnauthorizedUserResponseStatusException();
         }
 
-        if( userSession.getExpirationDate().isBefore(LocalDateTime.now().plusMinutes(10)) ) {
+        if (userSession.getExpirationDate().isBefore(LocalDateTime.now().plusMinutes(10))) {
             userSession.setExpirationDate(LocalDateTime.now().plusHours(1));
             userSessionService.saveUserSession(userSession);
         }
 
         return new ResponseEntity<User>(userSession.getUser(), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-users/{id}")
+    public List<User> getUsers(@PathVariable("id") Long id) {
+
+        User user = userService.getUser(id);
+        if (user == null) {
+            logService.logErrorMessage("UserService::getUser", id);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        if (user.getRole().getRoleType() == RoleType.Administrator) {
+            ArrayList<User> users = new ArrayList<User>();
+            users = (ArrayList<User>) userService.getAll();
+
+            return users;
+        }
+
+        if (user.getRole().getRoleType() == RoleType.Moderator) {
+            return refugeeService.getRefugeesByResponsibleUser(user.getId());
+        }
+
+        return new ArrayList<User>();
+    }
+
+    @GetMapping("/get-users-filtered/{id}/{email}")
+    public List<User> getUsers(@PathVariable("id") Long id, @PathVariable("email") String email) {
+
+        email = email.toLowerCase(Locale.ROOT);
+
+        User user = userService.getUser(id);
+        if (user == null) {
+            logService.logErrorMessage("UserService::getUser", id);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        if (user.getRole().getRoleType() == RoleType.Administrator) {
+            ArrayList<User> users = new ArrayList<User>();
+            users = (ArrayList<User>) userService.getAll(email);
+
+            return users;
+        }
+
+        if (user.getRole().getRoleType() == RoleType.Moderator) {
+            return refugeeService.getRefugeesByResponsibleUser(user.getId(), email);
+        }
+
+        return new ArrayList<User>();
+    }
+
+    @PostMapping("/update-user")
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+
+        user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
+
+        if (userService.checkEmailExists(user) != null) {
+            throw new CustomResponseStatusException("User with this email already exists");
+        }
+
+        if (userService.checkIdentifierExists(user) != null) {
+            throw new CustomResponseStatusException("User with this identifier already exists");
+        }
+
+        if (userService.updateUser(user) == null) {
+            logService.logErrorMessage("UserService::updateUser", user.getId());
+            throw new InternalErrorResponseStatusException();
+        }
+
+        return new ResponseEntity<User>(user, HttpStatus.OK);
+    }
+
+    @PutMapping("/change-status/{id}")
+    public ResponseEntity<User> changeStatus(@PathVariable("id") Long id) {
+
+        User user = userService.getUser(id);
+        if (user == null) {
+            logService.logErrorMessage("UserService::getUser", id);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        AccountStatus accountStatus = user.getAccountStatus();
+        accountStatus.setAccountStatusType(accountStatus.getAccountStatusType() == AccountStatusType.Blocked ?
+                AccountStatusType.Verified
+                : AccountStatusType.Blocked);
+
+        userSessionService.closeSessions(id);
+
+        accountStatus = accountStatusService.updateAccountStatus(accountStatus);
+        if (accountStatus == null) {
+            logService.logErrorMessage("AccountStatusService::updateAccountStatus", id);
+            throw new InternalErrorResponseStatusException();
+        }
+
+        user.setAccountStatus(accountStatus);
+        return new ResponseEntity<User>(user, HttpStatus.OK);
     }
 }

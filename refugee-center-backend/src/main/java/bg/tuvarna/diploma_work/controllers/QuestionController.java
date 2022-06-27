@@ -36,8 +36,8 @@ public class QuestionController {
         question.setQuestionState(QuestionState.Pending);
 
 
-        if( questionService.save( question ) == null ){
-            logService.logErrorMessage("QuestionService::save", question.getId() );
+        if (questionService.save(question) == null) {
+            logService.logErrorMessage("QuestionService::save", question.getId());
             throw new InternalErrorResponseStatusException();
         }
 
@@ -45,28 +45,28 @@ public class QuestionController {
     }
 
     @GetMapping("/get-questions")
-    public List<Question> getQuestions(){
+    public List<Question> getQuestions() {
 
         return questionService.getQuestions();
     }
 
     @PutMapping("/set-as-reserved/{id}")
     @Transactional
-    public void setAsReserved( @PathVariable long id){
+    public void setAsReserved(@PathVariable long id) {
 
         questionService.setAsReserved(id);
     }
 
     @PutMapping("/free-question/{id}")
     @Transactional
-    public void freeQuestion( @PathVariable long id){
+    public void freeQuestion(@PathVariable long id) {
 
         questionService.freeQuestion(id);
     }
 
     @PostMapping("/delete-selected-questions")
     @Transactional
-    public ResponseEntity<Void> deleteSelectedQuestions(@RequestBody List<Long> questions){
+    public ResponseEntity<Void> deleteSelectedQuestions(@RequestBody List<Long> questions) {
 
         questionService.deleteQuestions(questions);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -74,17 +74,17 @@ public class QuestionController {
 
     @PostMapping("/answer-question")
     @Transactional
-    public ResponseEntity<Void> answerQuestion(@RequestBody Question question){
+    public ResponseEntity<Void> answerQuestion(@RequestBody Question question) {
 
         question.setQuestionState(QuestionState.Answered);
         question = questionService.save(question);
-        if( question == null ){
-            logService.logErrorMessage("QuestionService::save", question.getId() );
+        if (question == null) {
+            logService.logErrorMessage("QuestionService::save", question.getId());
             throw new InternalErrorResponseStatusException();
         }
 
-        if( !mailService.sendQuestionAnswer(question) ){
-            logService.logErrorMessage("MailService::sendQuestionAnswer", question.getId() );
+        if (!mailService.sendQuestionAnswer(question)) {
+            logService.logErrorMessage("MailService::sendQuestionAnswer", question.getId());
             throw new InternalErrorResponseStatusException();
         }
 

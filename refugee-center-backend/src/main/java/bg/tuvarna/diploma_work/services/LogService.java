@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @Service
 public class LogService {
 
-    private static final String errorMessage        = "ERROR occurred while calling function {FUNCTION} with context {CONTEXT}";
-    private static final String warningMessage      = "WARNING occurred while calling function {FUNCTION} message {MESSAGE}";
-    private static final String informationMessage  = "INFORMATION {MESSAGE}";
+    private static final String errorMessage = "ERROR occurred while calling function {FUNCTION} with context {CONTEXT}";
+    private static final String warningMessage = "WARNING occurred while calling function {FUNCTION} message {MESSAGE}";
+    private static final String informationMessage = "INFORMATION {MESSAGE}";
 
     @Autowired
     private LogRepository logRepository;
@@ -22,15 +22,15 @@ public class LogService {
     @Autowired
     private UserRepository userRepository;
 
-    public void logErrorMessage(String functionName, String context ){
+    public void logErrorMessage(String functionName, String context) {
 
-        Log log = generateErrorLog( functionName, context );
+        Log log = generateErrorLog(functionName, context);
         logRepository.save(log);
     }
 
-    public void logErrorMessage(String functionName, Long context ){
+    public void logErrorMessage(String functionName, Long context) {
 
-        Log log = generateErrorLog( functionName, String.valueOf(context) );
+        Log log = generateErrorLog(functionName, String.valueOf(context));
         logRepository.save(log);
     }
 
@@ -42,14 +42,14 @@ public class LogService {
 
         String content = errorMessage
                 .replace("{FUNCTION}", functionName)
-                .replace("{CONTEXT}", context );
+                .replace("{CONTEXT}", context);
 
         log.setContent(content);
 
         return log;
     }
 
-    private Log generateWarningLog(String functionName, String message ){
+    private Log generateWarningLog(String functionName, String message) {
 
         Log log = new Log();
         log.setLogType(LogType.WARNING);
@@ -57,7 +57,7 @@ public class LogService {
 
         String content = warningMessage
                 .replace("{FUNCTION}", functionName)
-                .replace("{MESSAGE}", message );
+                .replace("{MESSAGE}", message);
 
         log.setContent(content);
 

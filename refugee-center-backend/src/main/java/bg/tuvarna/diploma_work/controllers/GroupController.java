@@ -31,24 +31,23 @@ public class GroupController {
     private LogService logService;
 
     @PostMapping("/create-group")
-    public ResponseEntity<Void> createGroup(@RequestBody Group group){
+    public ResponseEntity<Void> createGroup(@RequestBody Group group) {
 
-        if( group.getId() == null )
+        if (group.getId() == null)
             group.setId(0L);
 
-        if( group.getId() <= 0L )
+        if (group.getId() <= 0L)
             group.setCreationDate(LocalDate.now());
 
         Group databaseGroup = groupService.getGroupByEmail(group.getEmail());
-        if( databaseGroup != null && databaseGroup.getId() != group.getId() )
+        if (databaseGroup != null && databaseGroup.getId() != group.getId())
             throw new CustomResponseStatusException("Group with this email already exists");
 
-        if( !groupService.validateGroupType(group) )
+        if (!groupService.validateGroupType(group))
             throw new CustomResponseStatusException("Users in this group do not match the group type.");
 
-        if( groupService.createGroup(group) == null )
-        {
-            logService.logErrorMessage("GroupService::createGroup", String.valueOf(group.getEmail())  );
+        if (groupService.createGroup(group) == null) {
+            logService.logErrorMessage("GroupService::createGroup", String.valueOf(group.getEmail()));
             throw new InternalErrorResponseStatusException();
         }
 
@@ -61,35 +60,34 @@ public class GroupController {
     }
 
     @GetMapping("/get-group-users/{id}")
-    public List<User> getGroupUsers(@PathVariable long id) { return groupService.getGroupUsers(id); }
+    public List<User> getGroupUsers(@PathVariable long id) {
+        return groupService.getGroupUsers(id);
+    }
 
     @PostMapping("/get-users-for-adding")
-    public List<UserGroup> getUsersForAdding( @RequestBody Group group ){
+    public List<UserGroup> getUsersForAdding(@RequestBody Group group) {
 
         return groupService.getUsersForAdding(group);
     }
 
     @PostMapping("/add-user-to-group")
-    public ResponseEntity<Void> addUserToGroup( @RequestBody UserGroup userGroup ){
+    public ResponseEntity<Void> addUserToGroup(@RequestBody UserGroup userGroup) {
 
         User currentUser = userService.getUser(userGroup.getUser().getId());
-        if( currentUser == null )
-        {
-            logService.logErrorMessage("UserService::getUser",  String.valueOf(userGroup.getUser().getId()) );
+        if (currentUser == null) {
+            logService.logErrorMessage("UserService::getUser", String.valueOf(userGroup.getUser().getId()));
             throw new InternalErrorResponseStatusException();
         }
 
         Group currentGroup = groupService.getGroup(userGroup.getGroup().getId());
-        if( currentGroup == null )
-        {
-            logService.logErrorMessage("GroupService::getGroup", String.valueOf(userGroup.getGroup().getId())  );
+        if (currentGroup == null) {
+            logService.logErrorMessage("GroupService::getGroup", String.valueOf(userGroup.getGroup().getId()));
             throw new InternalErrorResponseStatusException();
         }
 
         UserGroup newUserGroup = new UserGroup(currentUser, currentGroup);
-        if( groupService.addUserGroup(newUserGroup) == null )
-        {
-            logService.logErrorMessage("GroupService::addUserGroup", String.valueOf(userGroup.getGroup().getId())  );
+        if (groupService.addUserGroup(newUserGroup) == null) {
+            logService.logErrorMessage("GroupService::addUserGroup", String.valueOf(userGroup.getGroup().getId()));
             throw new InternalErrorResponseStatusException();
         }
 
@@ -98,7 +96,7 @@ public class GroupController {
 
     @PostMapping("/remove-user-from-group")
     @Transactional
-    public ResponseEntity<Void> removeUserFromGroup( @RequestBody UserGroup userGroup ) {
+    public ResponseEntity<Void> removeUserFromGroup(@RequestBody UserGroup userGroup) {
 
         groupService.removeUserFromGroup(userGroup);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -108,9 +106,8 @@ public class GroupController {
     @Transactional
     public ResponseEntity<Void> deleteGroup(@PathVariable long id) {
 
-        if( !groupService.deleteGroup(id) )
-        {
-            logService.logErrorMessage("GroupService::deleteGroup", id );
+        if (!groupService.deleteGroup(id)) {
+            logService.logErrorMessage("GroupService::deleteGroup", id);
             throw new InternalErrorResponseStatusException();
         }
 

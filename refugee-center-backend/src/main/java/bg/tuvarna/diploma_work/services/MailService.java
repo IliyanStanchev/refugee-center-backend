@@ -12,7 +12,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.List;
@@ -40,7 +39,7 @@ public class MailService {
             mimeMessageHelper.setFrom(new InternetAddress(message.getSender()));
             mimeMessageHelper.setTo(message.getReceiver());
             mimeMessageHelper.setSubject(message.getSubject());
-            mimeMessageHelper.setText(message.getContent(),true);
+            mimeMessageHelper.setText(message.getContent(), true);
 
             javaMailSender.send(mimeMessageHelper.getMimeMessage());
         } catch (Exception e) {
@@ -61,11 +60,11 @@ public class MailService {
 
         final String messageContent = EmailTemplates.getResetPasswordTemplate()
                 .replace("{NAME}", user.getName())
-                .replace("{PASSWORD}", newPassword );
+                .replace("{PASSWORD}", newPassword);
 
         message.setContent(messageContent);
 
-        if(!sendEmail(message))
+        if (!sendEmail(message))
             return false;
 
         return true;
@@ -82,11 +81,11 @@ public class MailService {
 
         final String messageContent = EmailTemplates.getNewUserTemplate()
                 .replace("{NAME}", user.getName())
-                .replace("{PASSWORD}", newPassword );
+                .replace("{PASSWORD}", newPassword);
 
         message.setContent(messageContent);
 
-        if(!sendEmail(message))
+        if (!sendEmail(message))
             return false;
 
         return true;
@@ -147,7 +146,7 @@ public class MailService {
 
         mailMessage.setContent(messageContent);
 
-        if(!sendEmail(mailMessage))
+        if (!sendEmail(mailMessage))
             return false;
 
         return true;
@@ -168,7 +167,7 @@ public class MailService {
 
         mailMessage.setContent(messageContent);
 
-        if( mailMessageRepository.save(mailMessage) == null )
+        if (mailMessageRepository.save(mailMessage) == null)
             return false;
 
         return true;
@@ -189,7 +188,7 @@ public class MailService {
         mailMessageRepository.reserveMailMessages(threadId);
     }
 
-    public void updateMailMessage(MailMessage message){
+    public void updateMailMessage(MailMessage message) {
 
         mailMessageRepository.save(message);
     }

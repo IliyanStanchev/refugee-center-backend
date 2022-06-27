@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface UserMessageRepository extends JpaRepository<UserMessage, Long> {
 
-    @Query(value="SELECT DISTINCT ON (um.message_id) um.* FROM users_messages um JOIN messages m ON m.id = um.message_id JOIN users u ON m.sender_id = u.id WHERE u.id = ?1 ORDER BY um.message_id, m.date_received DESC", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (um.message_id) um.* FROM users_messages um JOIN messages m ON m.id = um.message_id JOIN users u ON m.sender_id = u.id WHERE u.id = ?1 ORDER BY um.message_id, m.date_received DESC", nativeQuery = true)
     List<UserMessage> getSendMessages(long userId);
 
     @Query("SELECT u FROM UserMessage u WHERE u.receiver.id = ?1 ORDER BY u.seen, u.message.dateReceived DESC")
@@ -21,7 +21,7 @@ public interface UserMessageRepository extends JpaRepository<UserMessage, Long> 
 
     @Modifying
     @Query("UPDATE UserMessage u SET u.seen = true WHERE u.id IN ( :messages )")
-    void markMessagesAsRead(@Param("messages") List<Long> messages );
+    void markMessagesAsRead(@Param("messages") List<Long> messages);
 
     @Modifying
     @Query("DELETE FROM UserMessage u WHERE u.id IN ( :messages )")

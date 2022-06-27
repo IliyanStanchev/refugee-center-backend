@@ -1,7 +1,6 @@
 package bg.tuvarna.diploma_work.storages;
 
 import bg.tuvarna.diploma_work.models.Message;
-import bg.tuvarna.diploma_work.models.UserMessage;
 
 import java.io.Serializable;
 import java.util.List;

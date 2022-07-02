@@ -2,13 +2,11 @@ package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
+import bg.tuvarna.diploma_work.enumerables.VerificationCodeType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
-import bg.tuvarna.diploma_work.models.AccountStatus;
-import bg.tuvarna.diploma_work.models.Facility;
-import bg.tuvarna.diploma_work.models.Refugee;
-import bg.tuvarna.diploma_work.models.User;
+import bg.tuvarna.diploma_work.models.*;
 import bg.tuvarna.diploma_work.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,6 +41,9 @@ public class RefugeeController {
 
     @Autowired
     private UserSessionService userSessionService;
+
+    @Autowired
+    private VerificationCodeService verificationCodeService;
 
     @GetMapping("/get-pending-registrations")
     public List<Refugee> getPendingRegistrations() {
@@ -104,8 +105,8 @@ public class RefugeeController {
             throw new InternalErrorResponseStatusException();
         }
 
-        final String newPassword = CharSequenceGenerator.generatePassword();
-        refugee.getUser().setPassword(newPassword);
+        final String passwordToken = CharSequenceGenerator.generatePasswordResetToken();
+        refugee.getUser().setPassword(passwordToken);
 
         User savedUser = userService.createOrUpdateUser(refugee.getUser(), RoleType.Refugee);
 
@@ -114,7 +115,17 @@ public class RefugeeController {
             throw new InternalErrorResponseStatusException();
         }
 
-        if (!mailService.sendNewUserEmail(refugee.getUser(), newPassword)) {
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setVerificationCodeType(VerificationCodeType.NewAccount);
+        verificationCode.setUser(savedUser);
+        verificationCode.setCode(passwordToken);
+
+        if( verificationCodeService.saveVerificationCode(verificationCode) == null ) {
+            logService.logErrorMessage("VerificationCodeService::saveVerificationCode", "");
+            throw new InternalErrorResponseStatusException();
+        }
+
+        if (!mailService.sendNewUserEmail(refugee.getUser(), passwordToken)) {
             logService.logErrorMessage("MailService::sendDeclinedRegistrationEmail", "");
             throw new InternalErrorResponseStatusException();
         }

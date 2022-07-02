@@ -1,6 +1,7 @@
 package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
+import bg.tuvarna.diploma_work.enumerables.VerificationCodeType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.models.AccountStatus;
@@ -8,6 +9,7 @@ import bg.tuvarna.diploma_work.models.Refugee;
 import bg.tuvarna.diploma_work.models.User;
 import bg.tuvarna.diploma_work.models.VerificationCode;
 import bg.tuvarna.diploma_work.services.*;
+import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 
 @CrossOrigin(origins = {"http://localhost:3000"})
 @RestController
@@ -52,6 +56,7 @@ public class VerificationCodeController {
         final String code = verificationCodeService.generateVerificationCode();
 
         VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setVerificationCodeType(VerificationCodeType.AccountVerification);
         verificationCode.setUser(refugee.getUser());
         verificationCode.setCode(code);
 
@@ -91,6 +96,17 @@ public class VerificationCodeController {
         }
 
         verificationCodeService.deleteVerificationCodes(verificationCode.getUser().getId());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password-verification")
+    @Transactional
+    public ResponseEntity<Void> resetPasswordVerification(@RequestBody VerificationCode verificationCode) {
+
+        if (!verificationCodeService.verifyVerificationCode(verificationCode)) {
+            throw new CustomResponseStatusException("Verification code is not valid. Please request a new one.");
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

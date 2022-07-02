@@ -2,6 +2,7 @@ package bg.tuvarna.diploma_work.controllers;
 
 import bg.tuvarna.diploma_work.enumerables.AccountStatusType;
 import bg.tuvarna.diploma_work.enumerables.RoleType;
+import bg.tuvarna.diploma_work.enumerables.VerificationCodeType;
 import bg.tuvarna.diploma_work.exceptions.CustomResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.InternalErrorResponseStatusException;
 import bg.tuvarna.diploma_work.exceptions.UnauthorizedUserResponseStatusException;
@@ -38,7 +39,7 @@ public class UserController {
     private MailService mailService;
 
     @Autowired
-    private RoleService roleService;
+    private VerificationCodeService verificationCodeService;
 
     @Autowired
     private AddressService addressService;
@@ -107,36 +108,37 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
+    @Transactional
     public ResponseEntity<Void> sendNewPassword(@RequestBody User user) {
 
         User currentUser = userService.getUserByEmail(user.getEmail());
         if (currentUser == null)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-        final String newPassword = CharSequenceGenerator.generatePassword();
+        final String resetPasswordToken = CharSequenceGenerator.generatePasswordResetToken();
 
-        User modifiedUser = userService.changePassword(currentUser, newPassword);
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setVerificationCodeType(VerificationCodeType.PasswordReset);
+        verificationCode.setUser(currentUser);
+        verificationCode.setCode(resetPasswordToken);
 
-        if (modifiedUser == null) {
-            logService.logErrorMessage("UserService::changePassword", modifiedUser.getEmail());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        User databaseUser = userService.getUser(modifiedUser.getId());
-        if (databaseUser == null) {
-            logService.logErrorMessage("CustomerService::getCustomerByUserID", String.valueOf(modifiedUser.getId()));
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        if (!mailService.sendResetPasswordEmail(databaseUser, newPassword)) {
+        if (!mailService.sendResetPasswordEmail(currentUser, resetPasswordToken)) {
             logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        verificationCodeService.deleteVerificationCodes(currentUser.getId());
+
+        if( verificationCodeService.saveVerificationCode(verificationCode) == null ) {
+            logService.logErrorMessage("VerificationCodeService::saveVerificationCode", "");
+            throw new InternalErrorResponseStatusException();
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/create-employee")
+    @Transactional
     public ResponseEntity<Void> createEmployee(@RequestBody User user) {
 
         user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));
@@ -151,8 +153,8 @@ public class UserController {
 
         user.setAccountStatus(accountStatus);
 
-        final String newPassword = CharSequenceGenerator.generatePassword();
-        user.setPassword(newPassword);
+        final String passwordToken = CharSequenceGenerator.generatePasswordResetToken();
+        user.setPassword(passwordToken);
 
         User savedUser = userService.createOrUpdateUser(user, RoleType.Moderator);
 
@@ -161,12 +163,22 @@ public class UserController {
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setVerificationCodeType(VerificationCodeType.NewAccount);
+        verificationCode.setUser(savedUser);
+        verificationCode.setCode(passwordToken);
+
+        if( verificationCodeService.saveVerificationCode(verificationCode) == null ) {
+            logService.logErrorMessage("VerificationCodeService::saveVerificationCode", "");
+            throw new InternalErrorResponseStatusException();
+        }
+
         if (!groupService.addEmployeeToGroups(savedUser)) {
             logService.logErrorMessage("GroupService::addEmployeeToGroups", user.getEmail());
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (!mailService.sendNewUserEmail(savedUser, newPassword)) {
+        if (!mailService.sendNewUserEmail(savedUser, passwordToken)) {
             logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -196,8 +208,8 @@ public class UserController {
         if (checkRefugee != null)
             throw new CustomResponseStatusException("Refugee with this phone number already exists");
 
-        final String newPassword = CharSequenceGenerator.generatePassword();
-        refugee.getUser().setPassword(newPassword);
+        final String passwordToken = CharSequenceGenerator.generatePasswordResetToken();
+        refugee.getUser().setPassword(passwordToken);
 
         AccountStatus accountStatus = accountStatusService
                 .saveAccountStatus(roleType == RoleType.Moderator ? AccountStatusType.Pending : AccountStatusType.Approved);
@@ -217,6 +229,18 @@ public class UserController {
         }
 
         refugee.setUser(savedUser);
+
+        if( roleType == RoleType.Administrator ){
+            VerificationCode verificationCode = new VerificationCode();
+            verificationCode.setVerificationCodeType(VerificationCodeType.NewAccount);
+            verificationCode.setUser(savedUser);
+            verificationCode.setCode(passwordToken);
+
+            if( verificationCodeService.saveVerificationCode(verificationCode) == null ) {
+                logService.logErrorMessage("VerificationCodeService::saveVerificationCode", "");
+                throw new InternalErrorResponseStatusException();
+            }
+        }
 
         Address savedAddress = addressService.saveAddress(refugee.getAddress());
         if (savedAddress == null) {
@@ -250,9 +274,11 @@ public class UserController {
             throw new InternalErrorResponseStatusException();
         }
 
-        if (!mailService.sendNewUserEmail(savedUser, newPassword)) {
-            logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
-            throw new InternalErrorResponseStatusException();
+        if( roleType == RoleType.Administrator ) {
+            if (!mailService.sendNewUserEmail(savedUser, passwordToken)) {
+                logService.logErrorMessage("MailService::sendResetPasswordEmail", "");
+                throw new InternalErrorResponseStatusException();
+            }
         }
 
         return new ResponseEntity<RoleType>(roleType, HttpStatus.OK);
@@ -291,6 +317,7 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
+    @Transactional
     public ResponseEntity<Void> changePassword(@RequestBody AccountData accountData) {
 
         User user = userService.getUser(accountData.getId());
@@ -300,8 +327,11 @@ public class UserController {
         }
 
         BCryptPasswordEncoderExtender encoder = new BCryptPasswordEncoderExtender();
-        if (!encoder.matches(accountData.getOldPassword(), user.getPassword()))
-            throw new CustomResponseStatusException("Old password is incorrect");
+
+        if( !accountData.isResetPasswordMode() ) {
+            if (!encoder.matches(accountData.getOldPassword(), user.getPassword()))
+                throw new CustomResponseStatusException("Old password is incorrect");
+        }
 
         user.getAccountStatus().setLastPasswordChangeDate(LocalDate.now());
 
@@ -318,10 +348,13 @@ public class UserController {
             throw new InternalErrorResponseStatusException();
         }
 
+        verificationCodeService.deleteVerificationCodes(user.getId());
+
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @PostMapping("/verify-user")
+    @Transactional
     public ResponseEntity<User> verifyUser(@RequestBody UserSession userSession) {
 
         if (userSession.getId() == null || userSession.getAuthorizationToken() == null) {
@@ -412,6 +445,7 @@ public class UserController {
     }
 
     @PostMapping("/update-user")
+    @Transactional
     public ResponseEntity<User> updateUser(@RequestBody User user) {
 
         user.setEmail(user.getEmail().toLowerCase(Locale.ROOT));

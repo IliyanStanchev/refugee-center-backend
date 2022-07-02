@@ -1,5 +1,6 @@
 package bg.tuvarna.diploma_work.services;
 
+import bg.tuvarna.diploma_work.enumerables.VerificationCodeType;
 import bg.tuvarna.diploma_work.helpers.CharSequenceGenerator;
 import bg.tuvarna.diploma_work.models.VerificationCode;
 import bg.tuvarna.diploma_work.repositories.VerificationCodeRepository;
@@ -56,6 +57,10 @@ public class VerificationCodeService {
         List<VerificationCode> verificationCodes = verificationCodeRepository.findAll();
 
         for (VerificationCode verificationCode : verificationCodes) {
+
+            if( verificationCode.getVerificationCodeType() == VerificationCodeType.NewAccount )
+                continue;
+
             if (verificationCode.getDateTime().isBefore(localDateTime)) {
                 verificationCodeRepository.delete(verificationCode);
             }

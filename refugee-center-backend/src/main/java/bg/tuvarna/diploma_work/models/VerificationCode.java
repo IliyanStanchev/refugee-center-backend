@@ -1,5 +1,7 @@
 package bg.tuvarna.diploma_work.models;
 
+import bg.tuvarna.diploma_work.enumerables.VerificationCodeType;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,16 +15,37 @@ public class VerificationCode implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(length = 64, nullable = false)
     private String code;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
     private LocalDateTime dateTime;
+
+    @Column(nullable = false)
+    private VerificationCodeType verificationCodeType;
 
     public VerificationCode() {
         dateTime = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public VerificationCodeType getVerificationCodeType() {
+        return verificationCodeType;
+    }
+
+    public void setVerificationCodeType(VerificationCodeType verificationCodeType) {
+        this.verificationCodeType = verificationCodeType;
     }
 
     public String getCode() {

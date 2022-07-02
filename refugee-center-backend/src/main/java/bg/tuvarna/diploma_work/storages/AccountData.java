@@ -7,11 +7,21 @@ public class AccountData implements Serializable {
 
     private Long id;
 
+    private boolean resetPasswordMode;
+
     private String oldPassword;
 
     private String newPassword;
 
     public AccountData() {
+    }
+
+    public boolean isResetPasswordMode() {
+        return resetPasswordMode;
+    }
+
+    public void setResetPasswordMode(boolean resetPasswordMode) {
+        this.resetPasswordMode = resetPasswordMode;
     }
 
     public Long getId() {

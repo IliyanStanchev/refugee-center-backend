@@ -49,7 +49,7 @@ public class MailService {
         return true;
     }
 
-    public boolean sendResetPasswordEmail(User user, String newPassword) {
+    public boolean sendResetPasswordEmail(User user, String resetPasswordToken) {
 
         MailMessage message = new MailMessage();
 
@@ -60,7 +60,8 @@ public class MailService {
 
         final String messageContent = EmailTemplates.getResetPasswordTemplate()
                 .replace("{NAME}", user.getName())
-                .replace("{PASSWORD}", newPassword);
+                .replace("{TOKEN}", resetPasswordToken)
+                .replace("{USER_ID}", user.getId().toString());
 
         message.setContent(messageContent);
 
@@ -70,7 +71,7 @@ public class MailService {
         return true;
     }
 
-    public boolean sendNewUserEmail(User user, String newPassword) {
+    public boolean sendNewUserEmail(User user, String passwordToken) {
 
         MailMessage message = new MailMessage();
 
@@ -81,7 +82,8 @@ public class MailService {
 
         final String messageContent = EmailTemplates.getNewUserTemplate()
                 .replace("{NAME}", user.getName())
-                .replace("{PASSWORD}", newPassword);
+                .replace("{TOKEN}", passwordToken)
+                .replace("{USER_ID}", user.getId().toString());
 
         message.setContent(messageContent);
 

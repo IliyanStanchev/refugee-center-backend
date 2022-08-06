@@ -20,6 +20,7 @@ public class UserMessage implements Serializable {
     @ManyToOne
     private User receiver;
 
+    @Column(nullable = false)
     private boolean seen;
 
     public UserMessage() {

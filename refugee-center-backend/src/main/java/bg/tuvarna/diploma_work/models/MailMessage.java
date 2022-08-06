@@ -13,23 +13,28 @@ public class MailMessage implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false, length = 64)
     private String sender;
 
+    @Column(nullable = false, length = 64)
     private String receiver;
 
+    @Column(nullable = false, length = 64)
     private String subject;
 
     @Column(length = 100000)
     private String content;
 
+    @Column(nullable = false)
     private long threadId;
 
+    @Column(nullable = false)
     private short unsuccessfulAttempts;
 
     public MailMessage() {
         id = 0L;
+        threadId = 0L;
         unsuccessfulAttempts = 0;
-
     }
 
     public short getUnsuccessfulAttempts() {
@@ -108,5 +113,11 @@ public class MailMessage implements Serializable {
                 ", receiver='" + receiver + '\'' +
                 ", subject='" + subject + '\'' +
                 ", content='" + content;
+    }
+
+    public void setUnsuccessful() {
+
+        threadId = 0L;
+        unsuccessfulAttempts++;
     }
 }

@@ -16,10 +16,15 @@ public class UserSession implements Serializable {
     @OneToOne
     private User user;
 
+    @Column(nullable = false, length = 128)
     private String authorizationToken;
 
+
+    @Column(nullable = false)
     private LocalDateTime creationDate;
 
+
+    @Column(nullable = false)
     private LocalDateTime expirationDate;
 
     private boolean activeSession;

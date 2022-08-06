@@ -25,7 +25,7 @@ public interface UserMessageRepository extends JpaRepository<UserMessage, Long> 
 
     @Modifying
     @Query("DELETE FROM UserMessage u WHERE u.id IN ( :messages )")
-    void deleteMessages(List<Long> messages);
+    void deleteMessages(@Param("messages") List<Long> messages);
 
     @Modifying
     @Query("UPDATE UserMessage u SET u.seen = true WHERE u.id = ?1")

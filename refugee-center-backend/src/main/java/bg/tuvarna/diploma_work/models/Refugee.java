@@ -16,22 +16,31 @@ public class Refugee implements Serializable {
     @ManyToOne
     private Address address;
 
+    @Column(nullable = false)
     private String phoneNumber;
 
+    @Column(nullable = false)
     private Long age;
 
     @ManyToOne
     private Facility facility;
 
+    @Column(nullable = false)
     private boolean removedFromFacility;
 
     @OneToOne
     private User user;
 
+
+    @Column(nullable = false, length = 128)
     private String diseases;
 
+
+    @Column(nullable = false, length = 128)
     private String allergens;
 
+
+    @Column(nullable = false, length = 128)
     private String specialDiet;
 
     public Refugee() {

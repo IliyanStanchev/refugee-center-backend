@@ -15,12 +15,16 @@ public class Address implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false, length = 16)
     private String countryIsoCode;
 
+    @Column(nullable = false, length = 16)
     private String stateIsoCode;
 
+    @Column(nullable = false, length = 64)
     private String cityName;
 
+    @Column(nullable = false, length = 256)
     private String address;
 
     public Address() {

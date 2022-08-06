@@ -14,10 +14,13 @@ public class Donor implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false, length = 64)
     private String email;
 
+    @Column(nullable = false, length = 64)
     private String name;
 
+    @Column(nullable = false)
     private LocalDate dateOfDonation;
 
     public Donor() {

@@ -19,6 +19,7 @@ public class DonationAbsorption implements Serializable {
     @ManyToOne
     private Facility facility;
 
+    @Column(nullable = false)
     private double absorption;
 
     public DonationAbsorption() {

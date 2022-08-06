@@ -16,13 +16,20 @@ public class Donation implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
+
+    @Column(nullable = false)
     private DonationType donationType;
+
+    @Column(nullable = false, length = 64)
     private String name;
+
+    @Column(nullable = false)
     private double quantity;
+
+    @Column(nullable = false)
     private Unit unit;
 
     public Donation() {
-
     }
 
     public Donation(DonationType donationType, double quantity, Unit unit, String donatorName, String donatorEmail, String donatorPhoneNumber) {

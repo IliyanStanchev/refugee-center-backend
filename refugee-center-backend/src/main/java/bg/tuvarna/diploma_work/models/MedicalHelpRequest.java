@@ -10,15 +10,20 @@ import java.time.LocalDateTime;
 @Table(name = "MEDICAL_HELP_REQUESTS")
 public class MedicalHelpRequest implements Serializable {
 
-    String description;
-    LocalDateTime dateCreated;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "refugee_id")
     private Refugee refugee;
+
+    @Column(nullable = false, length = 256)
+    String description;
+
+    @Column(nullable = false)
+    LocalDateTime dateCreated;
 
     public MedicalHelpRequest() {
     }

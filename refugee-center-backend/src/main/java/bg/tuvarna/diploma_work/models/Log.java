@@ -16,8 +16,12 @@ public class Log implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+
+    @Column(nullable = false)
     private LogType logType;
 
+
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
     @Column(length = 100000)
@@ -25,12 +29,6 @@ public class Log implements Serializable {
 
     public Log() {
 
-    }
-
-    public Log(LogType logType, LocalDateTime timestamp, String content, User user) {
-        this.logType = logType;
-        this.timestamp = timestamp;
-        this.content = content;
     }
 
     @Override

@@ -21,8 +21,10 @@ public class Group implements Serializable {
     @Column(unique = true)
     private String email;
 
+    @Column(nullable = false)
     private GroupType groupType;
 
+    @Column(nullable = false)
     private LocalDate creationDate;
 
     public Group() {

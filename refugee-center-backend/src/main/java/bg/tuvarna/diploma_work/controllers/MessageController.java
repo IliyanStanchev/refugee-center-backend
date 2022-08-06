@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,21 +87,7 @@ public class MessageController {
     @Transactional
     public ResponseEntity<Void> sendMessage(@RequestBody MessageData messageData) {
 
-        Set<User> receivers = new HashSet<>();
-
-        for (MailReceiver mailReceiver : messageData.getReceivers()) {
-
-            if (mailReceiver.getIsUser() == true) {
-                receivers.add(mailReceiver.getUser());
-                continue;
-            }
-
-            List<User> groupUsers = groupService.getGroupUsers(mailReceiver.getGroup().getId());
-            for (User user : groupUsers)
-                receivers.add(user);
-
-        }
-
+        Set<User> receivers = messageService.extractReceivers(messageData.getReceivers());
         if (receivers.size() < 0)
             return new ResponseEntity<>(HttpStatus.OK);
 
@@ -126,7 +114,7 @@ public class MessageController {
             }
 
             if (savedMessage.getMessageType() == MessageType.Important)
-                mailService.sendNewNotificationEmail(sender);
+                mailService.sendNewNotificationEmail(receiver);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);

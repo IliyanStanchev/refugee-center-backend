@@ -15,12 +15,16 @@ public class AccountStatus implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate createdOn;
 
+    @Column(nullable = false)
     private LocalDate lastLogin;
 
+    @Column(nullable = false)
     private LocalDate lastPasswordChangeDate;
 
+    @Column(nullable = false)
     private AccountStatusType accountStatusType;
 
     public AccountStatus() {

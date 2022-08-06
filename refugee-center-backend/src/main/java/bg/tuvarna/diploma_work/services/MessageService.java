@@ -2,17 +2,16 @@ package bg.tuvarna.diploma_work.services;
 
 import bg.tuvarna.diploma_work.enumerables.MessageType;
 import bg.tuvarna.diploma_work.models.*;
-import bg.tuvarna.diploma_work.repositories.GroupRepository;
-import bg.tuvarna.diploma_work.repositories.MessageRepository;
-import bg.tuvarna.diploma_work.repositories.UserMessageRepository;
-import bg.tuvarna.diploma_work.repositories.UserRepository;
+import bg.tuvarna.diploma_work.repositories.*;
 import bg.tuvarna.diploma_work.storages.MailReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class MessageService {
@@ -28,6 +27,9 @@ public class MessageService {
 
     @Autowired
     private UserMessageRepository userMessageRepository;
+
+    @Autowired
+    private UserGroupRepository userGroupRepository;
 
     @Autowired
     private LogService logService;
@@ -80,6 +82,7 @@ public class MessageService {
 
     public Message saveMessage(Message message) {
 
+        message.setDateReceived(LocalDate.now());
         return messageRepository.save(message);
     }
 
@@ -149,5 +152,22 @@ public class MessageService {
                 return;
             }
         }
+    }
+
+    public Set<User> extractReceivers( List < MailReceiver > mailReceivers )
+    {
+        Set<User> receivers = new HashSet<>();
+
+        for (MailReceiver mailReceiver : mailReceivers ) {
+            if (mailReceiver.getIsUser() == true) {
+                receivers.add(mailReceiver.getUser());
+                continue;
+            }
+            List<User> groupUsers = userGroupRepository.getUsersByGroupId(mailReceiver.getGroup().getId());
+            for (User user : groupUsers)
+                receivers.add(user);
+        }
+
+        return receivers;
     }
 }

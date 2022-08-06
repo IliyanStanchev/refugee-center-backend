@@ -16,7 +16,7 @@ public class Role implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
-    @NotNull
+    @Column(nullable = false)
     private RoleType roleType;
 
     public Role() {

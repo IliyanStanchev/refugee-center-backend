@@ -19,12 +19,16 @@ public class Message implements Serializable {
     @OneToOne
     private User sender;
 
+    @Column(nullable = false)
     private MessageType messageType;
 
+    @Column(nullable = false, length = 64)
     private String subject;
 
+    @Column(nullable = false, length = 256)
     private String content;
 
+    @Column(nullable = false)
     private LocalDate dateReceived;
 
     public Message() {

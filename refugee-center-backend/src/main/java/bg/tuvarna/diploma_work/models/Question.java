@@ -15,16 +15,27 @@ public class Question implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false, length = 64)
     private String email;
 
+
+    @Column(nullable = false, length = 64)
     private String name;
 
+
+    @Column(nullable = false, length = 256)
     private String message;
 
+
+    @Column(nullable = false)
     private LocalDate dateReceived;
 
+
+    @Column(nullable = false)
     private QuestionState questionState;
 
+
+    @Column(nullable = false, length = 256)
     private String answer;
 
     public Question() {

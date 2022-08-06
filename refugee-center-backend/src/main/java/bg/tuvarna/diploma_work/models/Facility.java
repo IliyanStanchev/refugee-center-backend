@@ -21,12 +21,14 @@ public class Facility implements Serializable {
     @ManyToOne
     private Address address;
 
+    @Column(nullable = false)
     private FacilityType facilityType;
 
+    @Column(nullable = false)
     private long maxCapacity;
-
+    @Column(nullable = false)
     private long currentCapacity;
-
+    @Column(nullable = false, length = 32)
     private String phoneNumber;
 
     public Facility() {

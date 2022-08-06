@@ -13,11 +13,19 @@ public class User implements Serializable {
     @Column(columnDefinition = "serial")
     private Long id;
 
+    @Column(nullable = false, length = 64)
     private String email;
+
+    @Column(nullable = false, length = 64)
     private String password;
 
+    @Column(nullable = false, length = 64)
     private String firstName;
+
+    @Column(nullable = false, length = 64)
     private String lastName;
+
+    @Column(nullable = false, length = 32)
     private String identifier;
 
     @ManyToOne

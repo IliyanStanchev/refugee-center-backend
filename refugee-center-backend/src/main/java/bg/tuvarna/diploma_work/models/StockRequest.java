@@ -10,18 +10,29 @@ import java.time.LocalDateTime;
 @Table(name = "STOCK_REQUESTS")
 public class StockRequest implements Serializable {
 
-    RequestStatus requestStatus;
-    String description;
-    String reason;
-    LocalDateTime dateCreated;
-    String employeeComment;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "refugee_id")
     private Refugee refugee;
+
+    @Column(nullable = false)
+    RequestStatus requestStatus;
+
+    @Column(nullable = false, length = 64)
+    String description;
+
+    @Column(nullable = false, length = 64)
+    String reason;
+
+    @Column(nullable = false)
+    LocalDateTime dateCreated;
+
+    @Column(nullable = false, length = 64)
+    String employeeComment;
 
     public StockRequest() {
     }

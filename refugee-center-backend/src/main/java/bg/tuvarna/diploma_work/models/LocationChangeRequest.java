@@ -9,21 +9,30 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "LOCATION_CHANGE_REQUESTS")
 public class LocationChangeRequest implements Serializable {
-
-    RequestStatus requestStatus;
-    String description;
-    LocalDateTime dateCreated;
-    String employeeComment;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "refugee_id")
     private Refugee refugee;
+
     @ManyToOne
     @JoinColumn(name = "shelter_id")
     private Facility shelter;
+
+    @Column(nullable = false)
+    RequestStatus requestStatus;
+
+    @Column(nullable = false, length = 256)
+    String description;
+
+    @Column(nullable = false)
+    LocalDateTime dateCreated;
+
+    @Column(nullable = false, length = 256)
+    String employeeComment;
 
     public LocationChangeRequest() {
     }
@@ -84,6 +93,5 @@ public class LocationChangeRequest implements Serializable {
     public void setRefugee(Refugee refugee) {
         this.refugee = refugee;
     }
-
 
 }
